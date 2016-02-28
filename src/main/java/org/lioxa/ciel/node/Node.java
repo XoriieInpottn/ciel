@@ -16,7 +16,7 @@ import org.lioxa.ciel.operator.Operator;
  * @author xi
  * @since Feb 26, 2016
  */
-public abstract class Node implements Executable {
+public abstract class Node implements Term, Executable {
 
     //
     // HasShape interface.

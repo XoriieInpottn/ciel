@@ -11,10 +11,27 @@ import org.lioxa.ciel.matrix.HasShape;
  */
 public interface Term extends HasShape {
 
+    /**
+     * Get the context.
+     *
+     * @return The context.
+     */
     Context getContext();
 
+    /**
+     * Get the number of the input {@link Term}.
+     *
+     * @return The number of the input.
+     */
     int getInputSize();
 
+    /**
+     * Get the specific input {@link Term}(node).
+     *
+     * @param index
+     *            The index.
+     * @return The input {@link Term}.
+     */
     Term getInput(int index);
 
 }
