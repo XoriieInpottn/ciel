@@ -1,6 +1,10 @@
 package org.lioxa.ciel;
 
+import java.util.Collection;
+
 import org.lioxa.ciel.node.Node;
+import org.lioxa.ciel.node.OperatorBinding;
+import org.lioxa.ciel.operator.Operator;
 
 /**
  * The {@link Context} is the context of all steps to create, build, execute
@@ -11,6 +15,35 @@ import org.lioxa.ciel.node.Node;
  * @since Sep 25, 2015
  */
 public class Context {
+
+    /**
+     * Bind operators to this context. <br/>
+     * When building an expression, the operator is selected automatically from
+     * the bindings.
+     *
+     * @param pkgName
+     *            The package name.
+     */
+    void bindOperators(String pkgName) {
+        Collection<Class<?>> classes = null;
+        for (Class<?> clazz : classes) {
+            OperatorBinding bindingAnn = clazz.getAnnotation(OperatorBinding.class);
+            if (bindingAnn == null) {
+                continue;
+            }
+            Object instance;
+            try {
+                instance = clazz.newInstance();
+            } catch (InstantiationException | IllegalAccessException e) {
+                String msg = String.format("Failed to instance operator \"%s\".", clazz.getName());
+                throw new RuntimeException(msg, e);
+            }
+            if (!(instance instanceof Operator)) {
+                String msg = String.format("\"%s\" is not a subclass of Operator.", clazz.getName());
+                throw new RuntimeException(msg);
+            }
+        }
+    }
 
     /**
      * Build the expression given by the {@link Term}. <br/>
