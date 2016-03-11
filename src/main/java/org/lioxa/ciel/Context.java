@@ -11,6 +11,7 @@ import org.lioxa.ciel.binding.MatchResult;
 import org.lioxa.ciel.binding.OperatorBinding;
 import org.lioxa.ciel.matrix.RealMatrix;
 import org.lioxa.ciel.node.Node;
+import org.lioxa.ciel.node.impl.AddNode;
 import org.lioxa.ciel.operator.Operator;
 import org.lioxa.ciel.utils.Reflects;
 
@@ -144,6 +145,33 @@ public class Context {
     WeakHashMap<Class<? extends Node>, WeakHashMap<Node, Object>> graph = new WeakHashMap<>();
 
     /**
+     * Create (or get the existing) a node with the specific type and inputs.
+     *
+     * @param clazz
+     *            The node class which indicates the node type.
+     * @param inputs
+     *            The input nodes.
+     * @return A node. It may be a new created node or an existing node in the
+     *         context.
+     */
+    public Node operate(Class<? extends Node> clazz, Node... inputs) {
+        Node node = this.queryGraph(clazz, inputs);
+        if (node == null) {
+            //
+            // TODO: The expression should be further optimized.
+            try {
+                node = clazz.newInstance();
+            } catch (InstantiationException | IllegalAccessException e) {
+                String msg = String.format("Failed to create node \"%s\".", clazz.getName());
+                throw new RuntimeException(msg, e);
+            }
+            node.setInputs(inputs);
+            this.insertGraph(node);
+        }
+        return node;
+    }
+
+    /**
      * Query a specific pattern of node in the graph.
      *
      * @param clazz
@@ -190,6 +218,35 @@ public class Context {
             this.graph.put(clazz, nodes);
         }
         nodes.put(node, null);
+    }
+
+    /**
+     * Add.
+     *
+     * @param input0
+     *            The input0.
+     * @param input1
+     *            The input1.
+     * @return The term that represent the result.
+     */
+    public Term add(Term input0, Term input1) {
+        Term term;
+        if (input0.hasShape(input1)) {
+            term = this.operate(AddNode.class, (Node) input0, (Node) input1);
+        } else {
+            if (input0.isScalar()) {
+                term = this.operate(AddNode.class, (Node) input0, (Node) input1);
+            } else if (input1.isScalar()) {
+                term = this.operate(AddNode.class, (Node) input0, (Node) input1);
+            } else {
+                //
+                // MM case, but they do not have the same shape.
+                // TODO: Detail information must be given.
+                String msg = String.format("Invalid shapes for add.");
+                throw new RuntimeException(msg);
+            }
+        }
+        return term;
     }
 
     //
