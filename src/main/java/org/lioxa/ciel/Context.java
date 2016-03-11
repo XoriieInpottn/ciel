@@ -24,6 +24,8 @@ import org.lioxa.ciel.utils.Reflects;
  */
 public class Context {
 
+    public static final String DEFAULT_OPERATOR_PACKAGE = "org.lioxa.ciel.operator.impl";
+
     //
     // Bindings.
     //
@@ -39,7 +41,7 @@ public class Context {
      *            The ,matrix class.
      * @return The operator instance.
      */
-    Operator getOperator(Class<? extends Node> target, Class<? extends RealMatrix> matrix) {
+    public Operator getOperator(Class<? extends Node> target, Class<? extends RealMatrix> matrix) {
         MatchResult bestResult = null;
         for (BindingMatcher matcher : this.matchers.values()) {
             MatchResult result = matcher.matchOperator(target, matrix);
@@ -88,7 +90,7 @@ public class Context {
      * @param pkgName
      *            The package name.
      */
-    void bindOperators(String pkgName) {
+    public void bindOperators(String pkgName) {
         Collection<Class<?>> classes = Reflects.getClasses(pkgName, false);
         BindingMatcher matcher = new BindingMatcher();
         this.matchers.put(pkgName, matcher);
@@ -131,7 +133,7 @@ public class Context {
      * @param pkgName
      *            The package name.
      */
-    void removeOperators(String pkgName) {
+    public void removeOperators(String pkgName) {
         this.matchers.remove(pkgName);
     }
 
