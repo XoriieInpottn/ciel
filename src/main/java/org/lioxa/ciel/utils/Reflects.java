@@ -129,4 +129,13 @@ public class Reflects {
         }
     }
 
+    public static int distance(Class<?> clazz, Class<?> superClass) {
+        int dist = 0;
+        while (!(clazz == null || clazz.equals(superClass))) {
+            clazz = clazz.getSuperclass();
+            dist++;
+        }
+        return clazz == null ? -1 : dist;
+    }
+
 }

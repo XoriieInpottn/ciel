@@ -1,4 +1,4 @@
-package org.lioxa.ciel.node;
+package org.lioxa.ciel.binding;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -7,6 +7,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.lioxa.ciel.matrix.RealMatrix;
+import org.lioxa.ciel.node.Node;
 
 /**
  *

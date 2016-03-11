@@ -3,9 +3,9 @@ package org.lioxa.ciel;
 import java.util.Collection;
 import java.util.WeakHashMap;
 
+import org.lioxa.ciel.binding.OperatorBinding;
 import org.lioxa.ciel.matrix.RealMatrix;
 import org.lioxa.ciel.node.Node;
-import org.lioxa.ciel.node.OperatorBinding;
 import org.lioxa.ciel.operator.Operator;
 import org.lioxa.ciel.utils.Reflects;
 
