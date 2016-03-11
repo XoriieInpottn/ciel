@@ -1,8 +1,13 @@
 package org.lioxa.ciel;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.WeakHashMap;
 
+import org.lioxa.ciel.binding.Binding;
+import org.lioxa.ciel.binding.BindingMatcher;
+import org.lioxa.ciel.binding.MatchResult;
 import org.lioxa.ciel.binding.OperatorBinding;
 import org.lioxa.ciel.matrix.RealMatrix;
 import org.lioxa.ciel.node.Node;
@@ -23,6 +28,58 @@ public class Context {
     // Bindings.
     //
 
+    Map<String, BindingMatcher> matchers = new HashMap<>();
+
+    /**
+     * Get the best operator instance for the given target and matrix.
+     *
+     * @param target
+     *            The target class.
+     * @param matrix
+     *            The ,matrix class.
+     * @return The operator instance.
+     */
+    Operator getOperator(Class<? extends Node> target, Class<? extends RealMatrix> matrix) {
+        MatchResult bestResult = null;
+        for (BindingMatcher matcher : this.matchers.values()) {
+            MatchResult result = matcher.matchOperator(target, matrix);
+            Binding binding = result.getBinding();
+            if (binding == null) {
+                continue;
+            }
+            if (bestResult == null) {
+                bestResult = result;
+            } else {
+                if (isBetterThan(result, bestResult)) {
+                    bestResult = result;
+                }
+            }
+        }
+        return bestResult == null ? null : bestResult.getBinding().getInstance();
+    }
+
+    /**
+     * Is the given match result better than the current best result?
+     *
+     * @param result
+     *            The given match result.
+     * @param bestResult
+     *            The current best match result.
+     * @return True if "result" better than "bestResult".
+     */
+    static boolean isBetterThan(MatchResult result, MatchResult bestResult) {
+        int bestDist = bestResult.getDistance();
+        int dist = result.getDistance();
+        if (dist < bestDist) {
+            return true;
+        } else if (dist == bestDist) {
+            if (result.getBinding().getRating() > bestResult.getBinding().getRating()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Bind operators to this context. <br/>
      * When building an expression, the operator is selected automatically from
@@ -33,8 +90,9 @@ public class Context {
      */
     void bindOperators(String pkgName) {
         Collection<Class<?>> classes = Reflects.getClasses(pkgName, false);
+        BindingMatcher matcher = new BindingMatcher();
+        this.matchers.put(pkgName, matcher);
         for (Class<?> clazz : classes) {
-            System.out.println(clazz.getName());
             //
             // First, {@link OperatorBinding} annotation is obtained. Classes
             // without this annotation are ignored.
@@ -62,8 +120,19 @@ public class Context {
                 throw new RuntimeException(msg);
             }
             //
-            // At last, the operator instance is stored in a map.
+            // At last, the operator instance is added to matcher.
+            matcher.bind(target, matrix, rating, (Operator) instance);
         }
+    }
+
+    /**
+     * Remove operators bind from the given package.
+     *
+     * @param pkgName
+     *            The package name.
+     */
+    void removeOperators(String pkgName) {
+        this.matchers.remove(pkgName);
     }
 
     //
