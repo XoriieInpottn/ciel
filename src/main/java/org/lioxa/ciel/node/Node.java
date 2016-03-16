@@ -5,10 +5,10 @@ import java.util.WeakHashMap;
 
 import org.lioxa.ciel.Context;
 import org.lioxa.ciel.Executable;
+import org.lioxa.ciel.HasMatrix;
+import org.lioxa.ciel.HasShape;
 import org.lioxa.ciel.Term;
-import org.lioxa.ciel.matrix.HasShape;
 import org.lioxa.ciel.matrix.RealMatrix;
-import org.lioxa.ciel.operator.Operator;
 
 /**
  * The {@link Node} class is the default implementation of {@link Executable}.
@@ -16,7 +16,7 @@ import org.lioxa.ciel.operator.Operator;
  * @author xi
  * @since Feb 26, 2016
  */
-public abstract class Node implements Term, Executable {
+public abstract class Node implements Term, HasMatrix, Executable {
 
     //
     // HasShape interface.
@@ -61,7 +61,7 @@ public abstract class Node implements Term, Executable {
     }
 
     //
-    // Context.
+    // Term interface.
     //
 
     protected Context context;
@@ -71,12 +71,7 @@ public abstract class Node implements Term, Executable {
         return this.context;
     }
 
-    //
-    // Structure.
-    //
-
     protected Node[] inputs;
-    protected RealMatrix[] inputMatrices;
     protected Map<Node, Object> outputs = new WeakHashMap<>();
 
     @Override
@@ -100,91 +95,47 @@ public abstract class Node implements Term, Executable {
      */
     public void setInputs(Node[] inputs) {
         this.inputs = inputs.clone();
-        this.inputMatrices = new RealMatrix[this.inputs.length];
         for (Node input : this.inputs) {
             input.outputs.put(this, null);
         }
     }
 
     //
-    //
+    // HasMatrix interface.
     //
 
-    protected Operator operator;
+    /**
+     * The result matrix is created by the operator when setting operator.
+     */
     protected RealMatrix matrix;
 
-    /**
-     * Get this node's operator.
-     *
-     * @return The operator there is one, or null will be return;
-     */
-    public Operator getOperator() {
-        return this.operator;
-    }
-
-    /**
-     * Set an operator to this node. <br/>
-     * At the same time, a result matrix is created by the operator. <br/>
-     * Note that the result matrix must be created by an specific operator since
-     * the matrix implementation can be <b>deeply depends</b> on the organize of
-     * the operator. Moreover, the operator can be set only once at the initial
-     * stage, or a runtime exception will be thrown.
-     *
-     * @param operator
-     *            The operator.
-     */
-    public void setOperator(Operator operator) {
-        if (this.operator != null) {
-            throw new IllegalStateException("Operator has been set.");
-        }
-        this.operator = operator;
-        this.matrix = this.operator.createMatrix(this.rowSize, this.colSize);
-    }
-
-    /**
-     * Get the result matrix. <br/>
-     * The result matrix is created by the operator when setting operator.
-     *
-     * @return The result matrix.
-     */
+    @Override
     public RealMatrix getMatrix() {
         return this.matrix;
     }
 
+    @Override
+    public void setMatrix(RealMatrix matrix) {
+        if (this.matrix != null) {
+            throw new IllegalStateException("Operator has been set.");
+        }
+        this.matrix = matrix;
+    }
+
     //
-    //
+    // Executable interface.
     //
 
     protected boolean isExpired = true;
 
-    /**
-     * Is the value of result matrix expired? <br/>
-     * If not, there is no need to execute this node. In many cases, it will
-     * help to save a lot of time.
-     *
-     * @return True if the value expired, false if not.
-     */
+    @Override
     public boolean isExpired() {
         return this.isExpired;
     }
 
-    /**
-     * Set the expired to "true" by force.
-     */
+    @Override
     public void setExpired() {
         this.isExpired = true;
-    }
-
-    @Override
-    public RealMatrix execute() {
-        for (int i = 0; i < this.inputs.length; i++) {
-            if (this.inputs[i].isExpired) {
-                this.inputs[i].execute();
-            }
-            this.inputMatrices[i] = this.inputs[i].matrix;
-        }
-        this.operator.execute(this.matrix, this.inputMatrices);
-        return this.matrix;
     }
 
 }

@@ -15,6 +15,20 @@ import org.lioxa.ciel.matrix.RealMatrix;
 public interface Executable {
 
     /**
+     * Is the value of result matrix expired? <br/>
+     * If not, there is no need to execute this node. In many cases, it will
+     * help to save a lot of time.
+     *
+     * @return True if the value expired, false if not.
+     */
+    boolean isExpired();
+
+    /**
+     * Set the expired to "true" by force.
+     */
+    void setExpired();
+
+    /**
      * Execute the expression and get the calculated value.
      *
      * @return The result matrix.

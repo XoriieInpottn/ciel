@@ -1,4 +1,4 @@
-package org.lioxa.ciel.matrix;
+package org.lioxa.ciel;
 
 /**
  * The {@link HasShape} is used to describe a matrix like number. <br/>

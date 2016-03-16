@@ -1,6 +1,6 @@
 package org.lioxa.ciel.matrix.impl;
 
-import org.lioxa.ciel.matrix.HasShape;
+import org.lioxa.ciel.HasShape;
 import org.lioxa.ciel.matrix.RealMatrix;
 
 /**

@@ -1,5 +1,7 @@
 package org.lioxa.ciel.matrix;
 
+import org.lioxa.ciel.HasShape;
+
 /**
  * The {@link RealMatrix} is used to describe matrices with double values. <br/>
  * Scalars, vectors can be also regarded as matrices.

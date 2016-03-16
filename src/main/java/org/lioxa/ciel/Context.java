@@ -267,7 +267,7 @@ public class Context {
      */
     public Executable build(Term term) {
         Node node = (Node) term;
-        if (node.getOperator() != null) {
+        if (node.getMatrix() != null) {
             return node;
         }
         int inputSize = term.getInputSize();
