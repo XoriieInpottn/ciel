@@ -11,7 +11,9 @@ import org.lioxa.ciel.binding.MatchResult;
 import org.lioxa.ciel.binding.OperatorBinding;
 import org.lioxa.ciel.matrix.RealMatrix;
 import org.lioxa.ciel.node.Node;
+import org.lioxa.ciel.node.impl.AddMSNode;
 import org.lioxa.ciel.node.impl.AddNode;
+import org.lioxa.ciel.node.impl.AddSMNode;
 import org.lioxa.ciel.operator.Operator;
 import org.lioxa.ciel.utils.Reflects;
 
@@ -235,9 +237,13 @@ public class Context {
             term = this.operate(AddNode.class, (Node) input0, (Node) input1);
         } else {
             if (input0.isScalar()) {
-                term = this.operate(AddNode.class, (Node) input0, (Node) input1);
+                //
+                // SM case.
+                term = this.operate(AddSMNode.class, (Node) input0, (Node) input1);
             } else if (input1.isScalar()) {
-                term = this.operate(AddNode.class, (Node) input0, (Node) input1);
+                //
+                // MS case.
+                term = this.operate(AddMSNode.class, (Node) input0, (Node) input1);
             } else {
                 //
                 // MM case, but they do not have the same shape.

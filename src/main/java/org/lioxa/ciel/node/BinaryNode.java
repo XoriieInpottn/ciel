@@ -19,7 +19,7 @@ public class BinaryNode extends Node implements HasOperator {
     // HasOperator interface.
     //
 
-    protected Operator operator;
+    protected BinaryOperator operator;
 
     @Override
     public Operator getOperator() {
@@ -34,7 +34,7 @@ public class BinaryNode extends Node implements HasOperator {
         if (!(operator instanceof BinaryOperator)) {
             throw new IllegalArgumentException("The argument \"operator\" is not an binary operator.");
         }
-        this.operator = operator;
+        this.operator = (BinaryOperator) operator;
         this.matrix = this.operator.createMatrix(this.rowSize, this.colSize);
     }
 

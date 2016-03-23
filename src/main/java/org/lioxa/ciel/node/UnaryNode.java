@@ -19,7 +19,7 @@ public class UnaryNode extends Node implements HasOperator {
     // HasOperator interface.
     //
 
-    protected Operator operator;
+    protected UnaryOperator operator;
 
     @Override
     public Operator getOperator() {
@@ -34,7 +34,7 @@ public class UnaryNode extends Node implements HasOperator {
         if (!(operator instanceof UnaryOperator)) {
             throw new IllegalArgumentException("The argument \"operator\" is not an unary operator.");
         }
-        this.operator = operator;
+        this.operator = (UnaryOperator) operator;
         this.matrix = this.operator.createMatrix(this.rowSize, this.colSize);
     }
 
