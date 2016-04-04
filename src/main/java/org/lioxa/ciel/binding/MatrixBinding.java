@@ -10,16 +10,16 @@ import org.lioxa.ciel.matrix.RealMatrix;
 import org.lioxa.ciel.node.Node;
 
 /**
- * The {@link OperatorBinding} annotation is used to bind an operator to a kind
- * of node with a specific matrix type.
+ * The {@link MatrixBinding} is used to bind a kind of real matrix
+ * implementation to a variable.
  *
  * @author xi
- * @since Oct 25, 2015
+ * @since Apr 1, 2016
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface OperatorBinding {
+public @interface MatrixBinding {
 
     /**
      * Target class.
@@ -36,14 +36,7 @@ public @interface OperatorBinding {
     Class<? extends RealMatrix> matrix();
 
     /**
-     * Matrix classes.
-     *
-     * @return The matrix classes.
-     */
-    Class<? extends RealMatrix>[] inputs();
-
-    /**
-     * Rating. <br/>
+     * The rating. <br/>
      * The default value is 10;
      *
      * @return The rating.

@@ -135,7 +135,7 @@ public class Reflects {
             clazz = clazz.getSuperclass();
             dist++;
         }
-        return clazz == null ? Integer.MAX_VALUE : dist;
+        return clazz == null ? -1 : dist;
     }
 
 }
