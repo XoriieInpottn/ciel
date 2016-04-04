@@ -21,31 +21,53 @@ public class BindingManager {
     Map<Class<?>, List<Object[]>> bindings = new HashMap<>();
 
     /**
+     * Add an operator binding to the manager.
      *
      * @param binding
+     *            The operator binding annotation.
      * @param instance
+     *            The operator instance.
      */
-    public void addBinding(OperatorBinding binding, Operator instance) {
+    public void addOperatorBinding(OperatorBinding binding, Operator instance) {
+        //
+        // Check arguments.
         Class<?> target = binding.target();
         Class<?>[] inputs = binding.inputs();
         Objects.requireNonNull(target);
         Objects.requireNonNull(inputs);
         if (inputs.length == 0) {
-            throw new IllegalArgumentException("Inputs of binding cannot be empty.");
+            throw new IllegalArgumentException("\"inputs\" of binding annotation cannot be empty.");
         }
+        //
+        // Get binding list for the given target.
         List<Object[]> lst = this.bindings.get(target);
         if (lst == null) {
             lst = new LinkedList<>();
             this.bindings.put(target, lst);
         }
+        //
+        // Add (binding, instance) tuple to the list.
         lst.add(new Object[] { binding, instance });
     }
 
+    /**
+     * Matcher operator with target and inputs.
+     *
+     * @param target
+     *            The target of the operator.
+     * @param inputs
+     *            The input types of the operator.
+     * @return
+     */
     public Operator matchOperator(Class<? extends Node> target, Class<? extends RealMatrix>[] inputs) {
+        //
+        // Get the binding list.
         List<Object[]> lst = this.bindings.get(target);
         if (lst == null) {
             return null;
         }
+        //
+        // Start matching.
         int minDist = Integer.MAX_VALUE;
         OperatorBinding bestBinding = null;
         Operator bestInstance = null;

@@ -94,11 +94,20 @@ public abstract class Node implements Term, HasMatrix, Executable {
      *            The input nodes.
      */
     public void setInputs(Node[] inputs) {
+        if (this.inputs != null) {
+            throw new IllegalStateException("Inputs has been set.");
+        }
         this.inputs = inputs.clone();
         for (Node input : this.inputs) {
             input.outputs.put(this, null);
         }
+        this.initShape();
     }
+
+    /**
+     * Initialize shape for the node.
+     */
+    protected abstract void initShape();
 
     //
     // HasMatrix interface.
@@ -117,7 +126,7 @@ public abstract class Node implements Term, HasMatrix, Executable {
     @Override
     public void setMatrix(RealMatrix matrix) {
         if (this.matrix != null) {
-            throw new IllegalStateException("Operator has been set.");
+            throw new IllegalStateException("Matrix has been set.");
         }
         this.matrix = matrix;
     }

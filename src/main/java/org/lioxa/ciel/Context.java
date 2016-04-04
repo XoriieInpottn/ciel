@@ -1,16 +1,16 @@
 package org.lioxa.ciel;
 
+import java.lang.reflect.Constructor;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.WeakHashMap;
 
-import org.lioxa.ciel.binding.Binding;
-import org.lioxa.ciel.binding.BindingMatcher;
-import org.lioxa.ciel.binding.MatchResult;
+import org.lioxa.ciel.binding.BindingManager;
 import org.lioxa.ciel.binding.OperatorBinding;
 import org.lioxa.ciel.matrix.RealMatrix;
+import org.lioxa.ciel.matrix.impl.RealMatrixImpl;
+import org.lioxa.ciel.node.LeafNode;
 import org.lioxa.ciel.node.Node;
+import org.lioxa.ciel.node.VarNode;
 import org.lioxa.ciel.node.impl.AddMSNode;
 import org.lioxa.ciel.node.impl.AddNode;
 import org.lioxa.ciel.node.impl.AddSMNode;
@@ -29,61 +29,25 @@ public class Context {
 
     public static final String DEFAULT_OPERATOR_PACKAGE = "org.lioxa.ciel.operator.impl";
 
+    public Context() {
+        this.bindOperators(DEFAULT_OPERATOR_PACKAGE);
+    }
+
     //
     // Bindings.
     //
 
-    Map<String, BindingMatcher> matchers = new HashMap<>();
+    Class<? extends RealMatrix> defaultMatrixClass = RealMatrixImpl.class;
 
-    /**
-     * Get the best operator instance for the given target and matrix.
-     *
-     * @param target
-     *            The target class.
-     * @param matrix
-     *            The ,matrix class.
-     * @return The operator instance.
-     */
-    public Operator getOperator(Class<? extends Node> target, Class<? extends RealMatrix> matrix) {
-        MatchResult bestResult = null;
-        for (BindingMatcher matcher : this.matchers.values()) {
-            MatchResult result = matcher.matchOperator(target, matrix);
-            Binding binding = result.getBinding();
-            if (binding == null) {
-                continue;
-            }
-            if (bestResult == null) {
-                bestResult = result;
-            } else {
-                if (isBetterThan(result, bestResult)) {
-                    bestResult = result;
-                }
-            }
-        }
-        return bestResult == null ? null : bestResult.getBinding().getInstance();
+    public Class<? extends RealMatrix> getDefaultMatrixClass() {
+        return this.defaultMatrixClass;
     }
 
-    /**
-     * Is the given match result better than the current best result?
-     *
-     * @param result
-     *            The given match result.
-     * @param bestResult
-     *            The current best match result.
-     * @return True if "result" better than "bestResult".
-     */
-    static boolean isBetterThan(MatchResult result, MatchResult bestResult) {
-        int bestDist = bestResult.getDistance();
-        int dist = result.getDistance();
-        if (dist < bestDist) {
-            return true;
-        } else if (dist == bestDist) {
-            if (result.getBinding().getRating() > bestResult.getBinding().getRating()) {
-                return true;
-            }
-        }
-        return false;
+    public void setDefaultMatrixClass(Class<? extends RealMatrix> defaultMatrixClass) {
+        this.defaultMatrixClass = defaultMatrixClass;
     }
+
+    BindingManager bindingManager = new BindingManager();
 
     /**
      * Bind operators to this context. <br/>
@@ -95,24 +59,16 @@ public class Context {
      */
     public void bindOperators(String pkgName) {
         Collection<Class<?>> classes = Reflects.getClasses(pkgName, false);
-        BindingMatcher matcher = new BindingMatcher();
-        this.matchers.put(pkgName, matcher);
         for (Class<?> clazz : classes) {
             //
-            // First, {@link OperatorBinding} annotation is obtained. Classes
+            // First, OperatorBinding annotation is obtained. Classes
             // without this annotation are ignored.
-            OperatorBinding bindingAnn = clazz.getAnnotation(OperatorBinding.class);
-            if (bindingAnn == null) {
+            OperatorBinding binding = clazz.getAnnotation(OperatorBinding.class);
+            if (binding == null) {
                 continue;
             }
             //
-            // Then, there are "target", "matrix" and "rating" to describe the
-            // operator.
-            Class<? extends Node> target = bindingAnn.target();
-            Class<? extends RealMatrix> matrix = bindingAnn.matrix();
-            int rating = bindingAnn.rating();
-            //
-            // Create the operator instance.
+            // Then, create the operator instance.
             Object instance;
             try {
                 instance = clazz.newInstance();
@@ -125,19 +81,9 @@ public class Context {
                 throw new RuntimeException(msg);
             }
             //
-            // At last, the operator instance is added to matcher.
-            matcher.bind(target, matrix, rating, (Operator) instance);
+            // At last, the operator instance is added.
+            this.bindingManager.addOperatorBinding(binding, (Operator) instance);
         }
-    }
-
-    /**
-     * Remove operators bind from the given package.
-     *
-     * @param pkgName
-     *            The package name.
-     */
-    public void removeOperators(String pkgName) {
-        this.matchers.remove(pkgName);
     }
 
     //
@@ -145,6 +91,12 @@ public class Context {
     //
 
     WeakHashMap<Class<? extends Node>, WeakHashMap<Node, Object>> graph = new WeakHashMap<>();
+
+    public Node var(int rowSize, int colSize) {
+        Node node = new VarNode(rowSize, colSize);
+        this.insertGraph(node);
+        return node;
+    }
 
     /**
      * Create (or get the existing) a node with the specific type and inputs.
@@ -276,10 +228,29 @@ public class Context {
         if (node.getMatrix() != null) {
             return node;
         }
-        int inputSize = term.getInputSize();
-        for (int i = 0; i < inputSize; i++) {
-            Node input = (Node) term.getInput(i);
-            this.build(input);
+        //
+        // Build.
+        if (node instanceof HasOperator) {
+            int inputSize = term.getInputSize();
+            @SuppressWarnings("unchecked")
+            Class<? extends RealMatrix>[] inputMatrixClasses = new Class[inputSize];
+            for (int i = 0; i < inputSize; i++) {
+                Node input = (Node) term.getInput(i);
+                this.build(input);
+                inputMatrixClasses[i] = input.getMatrix().getClass();
+            }
+            Operator operator = this.bindingManager.matchOperator(node.getClass(), inputMatrixClasses);
+            ((HasOperator) node).setOperator(operator);
+        } else if (node instanceof LeafNode && node.getMatrix() == null) {
+            RealMatrix matrix;
+            try {
+                Constructor<? extends RealMatrix> c;
+                c = this.defaultMatrixClass.getConstructor(int.class, int.class);
+                matrix = c.newInstance(node.getRowSize(), node.getColumnSize());
+            } catch (Exception e) {
+                throw new RuntimeException("", e);
+            }
+            node.setMatrix(matrix);
         }
         return node;
     }

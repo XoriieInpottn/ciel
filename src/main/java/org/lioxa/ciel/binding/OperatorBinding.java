@@ -29,13 +29,6 @@ public @interface OperatorBinding {
     Class<? extends Node> target();
 
     /**
-     * Matrix class.
-     *
-     * @return The matrix class.
-     */
-    Class<? extends RealMatrix> matrix();
-
-    /**
      * Matrix classes.
      *
      * @return The matrix classes.

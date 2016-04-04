@@ -10,4 +10,10 @@ import org.lioxa.ciel.node.BinaryNode;
  */
 public class SubNode extends BinaryNode {
 
+    @Override
+    protected void initShape() {
+        this.rowSize = this.inputs[0].getRowSize();
+        this.colSize = this.inputs[0].getColumnSize();
+    }
+
 }

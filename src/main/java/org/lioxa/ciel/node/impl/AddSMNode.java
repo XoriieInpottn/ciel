@@ -10,4 +10,10 @@ import org.lioxa.ciel.node.BinaryNode;
  */
 public class AddSMNode extends BinaryNode {
 
+    @Override
+    protected void initShape() {
+        this.rowSize = this.inputs[1].getRowSize();
+        this.colSize = this.inputs[1].getColumnSize();
+    }
+
 }

@@ -12,8 +12,7 @@ import org.lioxa.ciel.operator.BinaryOperator;
  * @author xi
  * @since Mar 12, 2016
  */
-@OperatorBinding(target = SubMSNode.class, matrix = RealMatrixImpl.class, inputs = { RealMatrixImpl.class,
-    RealMatrixImpl.class })
+@OperatorBinding(target = SubMSNode.class, inputs = { RealMatrixImpl.class, RealMatrixImpl.class })
 public class SubMSOperator extends BinaryOperator {
 
     @Override

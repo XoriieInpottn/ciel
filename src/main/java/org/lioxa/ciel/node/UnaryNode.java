@@ -13,7 +13,7 @@ import org.lioxa.ciel.operator.UnaryOperator;
  * @author xi
  * @since Feb 26, 2016
  */
-public class UnaryNode extends Node implements HasOperator {
+public abstract class UnaryNode extends Node implements HasOperator {
 
     //
     // HasOperator interface.
@@ -32,7 +32,9 @@ public class UnaryNode extends Node implements HasOperator {
             throw new IllegalStateException("Operator has been set.");
         }
         if (!(operator instanceof UnaryOperator)) {
-            throw new IllegalArgumentException("The argument \"operator\" is not an unary operator.");
+            String optClassName = operator.getClass().getName();
+            String msg = String.format("The argument \"operator\": %s is not an unary operator.", optClassName);
+            throw new IllegalArgumentException(msg);
         }
         this.operator = (UnaryOperator) operator;
         this.matrix = this.operator.createMatrix(this.rowSize, this.colSize);
