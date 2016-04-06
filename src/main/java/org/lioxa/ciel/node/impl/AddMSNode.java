@@ -1,6 +1,7 @@
 package org.lioxa.ciel.node.impl;
 
 import org.lioxa.ciel.node.BinaryNode;
+import org.lioxa.ciel.node.Node;
 
 /**
  * Add node (Matrix + Scalar).
@@ -11,9 +12,9 @@ import org.lioxa.ciel.node.BinaryNode;
 public class AddMSNode extends BinaryNode {
 
     @Override
-    protected void initShape() {
-        this.rowSize = this.inputs[0].getRowSize();
-        this.colSize = this.inputs[0].getColumnSize();
+    protected void initShape(Node input0, Node input1) {
+        this.rowSize = input0.getRowSize();
+        this.colSize = input0.getColumnSize();
     }
 
 }

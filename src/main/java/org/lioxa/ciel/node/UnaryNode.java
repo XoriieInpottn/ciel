@@ -15,6 +15,13 @@ import org.lioxa.ciel.operator.UnaryOperator;
  */
 public abstract class UnaryNode extends Node implements HasOperator {
 
+    @Override
+    protected void initShape() {
+        this.initShape(this.inputs[0]);
+    }
+
+    protected abstract void initShape(Node input0);
+
     //
     // HasOperator interface.
     //

@@ -15,6 +15,13 @@ import org.lioxa.ciel.operator.Operator;
  */
 public abstract class BinaryNode extends Node implements HasOperator {
 
+    @Override
+    protected void initShape() {
+        this.initShape(this.inputs[0], this.inputs[1]);
+    }
+
+    protected abstract void initShape(Node input0, Node input1);
+
     //
     // HasOperator interface.
     //

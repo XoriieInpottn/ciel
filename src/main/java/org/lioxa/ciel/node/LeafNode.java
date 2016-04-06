@@ -10,18 +10,13 @@ import org.lioxa.ciel.matrix.RealMatrix;
 public class LeafNode extends Node {
 
     @Override
-    public void setInputs(Node[] inputs) {
-        throw new UnsupportedOperationException();
+    public RealMatrix execute() {
+        return this.matrix;
     }
 
     @Override
     protected void initShape() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public RealMatrix execute() {
-        return this.matrix;
+        throw new UnsupportedOperationException("LeafNode cannot have any inputs.");
     }
 
 }
