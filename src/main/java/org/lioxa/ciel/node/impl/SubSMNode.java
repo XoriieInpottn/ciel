@@ -17,4 +17,10 @@ public class SubSMNode extends BinaryNode {
         this.colSize = input1.getColumnSize();
     }
 
+    @Override
+    public Node diff(Node diff, Node respectTo) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

@@ -1,6 +1,7 @@
 package org.lioxa.ciel.node;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.WeakHashMap;
 
 import org.lioxa.ciel.Context;
@@ -71,6 +72,13 @@ public abstract class Node implements Term, HasMatrix, Executable {
         return this.context;
     }
 
+    public void setContext(Context context) {
+        if (this.context != null) {
+            throw new IllegalStateException("Context has been set.");
+        }
+        this.context = context;
+    }
+
     protected Node[] inputs;
     protected Map<Node, Object> outputs = new WeakHashMap<>();
 
@@ -84,30 +92,9 @@ public abstract class Node implements Term, HasMatrix, Executable {
         return this.inputs[index];
     }
 
-    /**
-     * Set all input nodes to this node. <br/>
-     * At the same time, the output of the given nodes will be set to this node.
-     * This method is very important, and it is the first step to initialize a
-     * new node.
-     *
-     * @param inputs
-     *            The input nodes.
-     */
-    public void setInputs(Node[] inputs) {
-        if (this.inputs != null) {
-            throw new IllegalStateException("Inputs has been set.");
-        }
-        this.inputs = inputs.clone();
-        for (Node input : this.inputs) {
-            input.outputs.put(this, null);
-        }
-        this.initShape();
+    public Set<Node> getOutputs() {
+        return this.outputs.keySet();
     }
-
-    /**
-     * Initialize shape for the node.
-     */
-    protected abstract void initShape();
 
     //
     // HasMatrix interface.
@@ -146,5 +133,17 @@ public abstract class Node implements Term, HasMatrix, Executable {
     public void setExpired() {
         this.isExpired = true;
     }
+
+    //
+    // Build.
+    //
+
+    public abstract void build();
+
+    //
+    // Differentiation.
+    //
+
+    public abstract Node diff(Node diff, Node respectTo);
 
 }

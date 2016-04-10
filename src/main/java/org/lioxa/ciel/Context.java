@@ -1,20 +1,32 @@
 package org.lioxa.ciel;
 
-import java.lang.reflect.Constructor;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.WeakHashMap;
 
 import org.lioxa.ciel.binding.BindingManager;
 import org.lioxa.ciel.binding.OperatorBinding;
 import org.lioxa.ciel.matrix.RealMatrix;
 import org.lioxa.ciel.matrix.impl.RealMatrixImpl;
-import org.lioxa.ciel.node.LeafNode;
+import org.lioxa.ciel.matrix.impl.SingleValueMatrix;
+import org.lioxa.ciel.node.ConstNode;
+import org.lioxa.ciel.node.InternalNode;
 import org.lioxa.ciel.node.Node;
+import org.lioxa.ciel.node.OneNode;
 import org.lioxa.ciel.node.VarNode;
+import org.lioxa.ciel.node.ZeroNode;
 import org.lioxa.ciel.node.impl.AddMSNode;
 import org.lioxa.ciel.node.impl.AddNode;
 import org.lioxa.ciel.node.impl.AddSMNode;
 import org.lioxa.ciel.operator.Operator;
+import org.lioxa.ciel.simplifier.Simplifier;
+import org.lioxa.ciel.simplifier.Simplifiers;
 import org.lioxa.ciel.utils.Reflects;
 
 /**
@@ -40,7 +52,7 @@ public class Context {
     Class<? extends RealMatrix> defaultMatrixClass = RealMatrixImpl.class;
 
     public Class<? extends RealMatrix> getDefaultMatrixClass() {
-        return this.defaultMatrixClass;
+        return this.defaultMatrixClass == null ? RealMatrixImpl.class : this.defaultMatrixClass;
     }
 
     public void setDefaultMatrixClass(Class<? extends RealMatrix> defaultMatrixClass) {
@@ -48,6 +60,10 @@ public class Context {
     }
 
     BindingManager bindingManager = new BindingManager();
+
+    public BindingManager getBindingManager() {
+        return this.bindingManager;
+    }
 
     /**
      * Bind operators to this context. <br/>
@@ -92,8 +108,37 @@ public class Context {
 
     WeakHashMap<Class<? extends Node>, WeakHashMap<Node, Object>> graph = new WeakHashMap<>();
 
-    public Node var(int rowSize, int colSize) {
+    public Node newVar(int rowSize, int colSize) {
         Node node = new VarNode(rowSize, colSize);
+        node.setContext(this);
+        this.insertGraph(node);
+        return node;
+    }
+
+    public Node newConst(RealMatrix value) {
+        Node node = new ConstNode(value);
+        node.setContext(this);
+        this.insertGraph(node);
+        return node;
+    }
+
+    public Node newConst(int rowSize, int colSize, double value) {
+        Node node = new ConstNode(new SingleValueMatrix(rowSize, colSize, value));
+        node.setContext(this);
+        this.insertGraph(node);
+        return node;
+    }
+
+    public Node newOne(int rowSize, int colSize) {
+        Node node = new OneNode(rowSize, colSize);
+        node.setContext(this);
+        this.insertGraph(node);
+        return node;
+    }
+
+    public Node newZero(int rowSize, int colSize) {
+        Node node = new ZeroNode(rowSize, colSize);
+        node.setContext(this);
         this.insertGraph(node);
         return node;
     }
@@ -108,21 +153,67 @@ public class Context {
      * @return A node. It may be a new created node or an existing node in the
      *         context.
      */
-    public Node operate(Class<? extends Node> clazz, Node... inputs) {
-        Node node = this.queryGraph(clazz, inputs);
-        if (node == null) {
-            //
-            // TODO: The expression should be further optimized.
-            try {
-                node = clazz.newInstance();
-            } catch (InstantiationException | IllegalAccessException e) {
-                String msg = String.format("Failed to create node \"%s\".", clazz.getName());
-                throw new RuntimeException(msg, e);
-            }
-            node.setInputs(inputs);
-            this.insertGraph(node);
+    public Node newOpt(Class<? extends InternalNode> clazz, Node... inputs) {
+        InternalNode node = (InternalNode) this.queryGraph(clazz, inputs);
+        if (node != null) {
+            return node;
         }
-        return node;
+        //
+        // If this kind of node has never been created, created it now.
+        try {
+            node = clazz.newInstance();
+        } catch (InstantiationException | IllegalAccessException e) {
+            String msg = String.format("Failed to create node %s.", clazz.getName());
+            throw new RuntimeException(msg, e);
+        }
+        //
+        // Then, set the basic info to it.
+        node.setContext(this);
+        node.setInputs(inputs);
+        //
+        // And insert it into the global graph.
+        this.insertGraph(node);
+        //
+        // At last, the node is simplified, and return.
+        return this.simplify(node);
+    }
+
+    Map<Class<?>, Simplifier> simplifiers = new HashMap<>();
+
+    Node simplify(InternalNode node) {
+        Simplifiers simsAnn = node.getClass().getAnnotation(Simplifiers.class);
+        if (simsAnn == null) {
+            return node;
+        }
+        Class<? extends Simplifier>[] sims = simsAnn.value();
+        if (sims == null || sims.length == 0) {
+            return node;
+        }
+        //
+        // Start simplify.
+        Node node1 = node;
+        for (Class<? extends Simplifier> simClass : sims) {
+            if (!(node1 instanceof InternalNode)) {
+                //
+                // Cannot simplify any non-internal nodes.
+                break;
+            }
+            //
+            // Get a singleton simplifier instance.
+            Simplifier sim = this.simplifiers.get(simClass);
+            if (sim == null) {
+                try {
+                    sim = simClass.newInstance();
+                } catch (InstantiationException | IllegalAccessException e) {
+                    String msg = String.format("Failed to create simplifier %s.", simClass.getName());
+                    throw new RuntimeException(msg, e);
+                }
+            }
+            //
+            // Do simplification.
+            node1 = sim.simplify((InternalNode) node1);
+        }
+        return node1;
     }
 
     /**
@@ -186,16 +277,16 @@ public class Context {
     public Term add(Term input0, Term input1) {
         Term term;
         if (input0.hasShape(input1)) {
-            term = this.operate(AddNode.class, (Node) input0, (Node) input1);
+            term = this.newOpt(AddNode.class, (Node) input0, (Node) input1);
         } else {
             if (input0.isScalar()) {
                 //
                 // SM case.
-                term = this.operate(AddSMNode.class, (Node) input0, (Node) input1);
+                term = this.newOpt(AddSMNode.class, (Node) input0, (Node) input1);
             } else if (input1.isScalar()) {
                 //
                 // MS case.
-                term = this.operate(AddMSNode.class, (Node) input0, (Node) input1);
+                term = this.newOpt(AddMSNode.class, (Node) input0, (Node) input1);
             } else {
                 //
                 // MM case, but they do not have the same shape.
@@ -225,34 +316,64 @@ public class Context {
      */
     public Executable build(Term term) {
         Node node = (Node) term;
-        if (node.getMatrix() != null) {
-            return node;
-        }
-        //
-        // Build.
-        if (node instanceof HasOperator) {
-            int inputSize = term.getInputSize();
-            @SuppressWarnings("unchecked")
-            Class<? extends RealMatrix>[] inputMatrixClasses = new Class[inputSize];
-            for (int i = 0; i < inputSize; i++) {
-                Node input = (Node) term.getInput(i);
-                this.build(input);
-                inputMatrixClasses[i] = input.getMatrix().getClass();
-            }
-            Operator operator = this.bindingManager.matchOperator(node.getClass(), inputMatrixClasses);
-            ((HasOperator) node).setOperator(operator);
-        } else if (node instanceof LeafNode && node.getMatrix() == null) {
-            RealMatrix matrix;
-            try {
-                Constructor<? extends RealMatrix> c;
-                c = this.defaultMatrixClass.getConstructor(int.class, int.class);
-                matrix = c.newInstance(node.getRowSize(), node.getColumnSize());
-            } catch (Exception e) {
-                throw new RuntimeException("", e);
-            }
-            node.setMatrix(matrix);
-        }
+        node.build();
         return node;
     }
 
+    //
+    // Gradient.
+    //
+
+    public Node grad(Node cost, Node respectTo) {
+        if (cost.getContext() != this || respectTo.getContext() != this) {
+            throw new RuntimeException("Any of the nodes may not belong to this context.");
+        }
+        Set<Node> availables = new HashSet<>();
+        List<Node> queue = new LinkedList<>();
+        queue.add(cost);
+        while (!queue.isEmpty()) {
+            Node node = queue.remove(0);
+            availables.add(node);
+            int inputSize = node.getInputSize();
+            for (int i = 0; i < inputSize; i++) {
+                queue.add((Node) node.getInput(i));
+            }
+        }
+        if (!availables.contains(respectTo)) {
+            String msg = String.format("%s is not a component of %.", respectTo, cost);
+            throw new RuntimeException(msg);
+        }
+        return this.grad(cost, respectTo, availables);
+    }
+
+    Node grad(Node cost, Node respectTo, Set<Node> availables) {
+        if (respectTo.equals(cost)) {
+            return this.newOne(1, 1);
+        }
+        List<Node> parts = new LinkedList<>();
+        for (Node output : respectTo.getOutputs()) {
+            if (!availables.contains(output)) {
+                continue;
+            }
+            Node grad = this.grad(cost, output, availables);
+            grad = output.diff(grad, respectTo);
+            parts.add(grad);
+        }
+        switch (parts.size()) {
+        case 0:
+            String msg = String.format("%s is not a component of %.", respectTo, cost);
+            throw new RuntimeException(msg);
+        case 1:
+            return parts.get(0);
+        default:
+            Iterator<Node> iter = parts.iterator();
+            iter.hasNext();
+            Node grad = iter.next();
+            while (iter.hasNext()) {
+                Node grad1 = iter.next();
+                grad = this.newOpt(AddNode.class, grad, grad1);
+            }
+            return grad;
+        }
+    }
 }

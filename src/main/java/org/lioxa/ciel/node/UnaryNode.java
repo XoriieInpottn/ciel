@@ -1,6 +1,5 @@
 package org.lioxa.ciel.node;
 
-import org.lioxa.ciel.HasOperator;
 import org.lioxa.ciel.matrix.RealMatrix;
 import org.lioxa.ciel.operator.Operator;
 import org.lioxa.ciel.operator.UnaryOperator;
@@ -13,7 +12,7 @@ import org.lioxa.ciel.operator.UnaryOperator;
  * @author xi
  * @since Feb 26, 2016
  */
-public abstract class UnaryNode extends Node implements HasOperator {
+public abstract class UnaryNode extends InternalNode {
 
     @Override
     protected void initShape() {
@@ -22,28 +21,14 @@ public abstract class UnaryNode extends Node implements HasOperator {
 
     protected abstract void initShape(Node input0);
 
-    //
-    // HasOperator interface.
-    //
-
-    protected UnaryOperator operator;
-
     @Override
-    public Operator getOperator() {
-        return this.operator;
-    }
-
-    @Override
-    public void setOperator(Operator operator) {
-        if (this.operator != null) {
-            throw new IllegalStateException("Operator has been set.");
-        }
+    protected void setOperator(Operator operator) {
         if (!(operator instanceof UnaryOperator)) {
             String optClassName = operator.getClass().getName();
             String msg = String.format("The argument \"operator\": %s is not an unary operator.", optClassName);
             throw new IllegalArgumentException(msg);
         }
-        this.operator = (UnaryOperator) operator;
+        this.operator = operator;
         this.matrix = this.operator.createMatrix(this.rowSize, this.colSize);
     }
 
@@ -62,7 +47,7 @@ public abstract class UnaryNode extends Node implements HasOperator {
         RealMatrix matrix0 = input0.getMatrix();
         //
         // Execute the operator.
-        this.operator.execute(this.matrix, matrix0);
+        ((UnaryOperator) this.operator).execute(this.matrix, matrix0);
         return this.matrix;
     }
 

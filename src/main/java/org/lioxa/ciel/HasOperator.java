@@ -31,6 +31,6 @@ public interface HasOperator {
      * @param operator
      *            The operator.
      */
-    void setOperator(Operator operator);
+    // void setOperator(Operator operator);
 
 }

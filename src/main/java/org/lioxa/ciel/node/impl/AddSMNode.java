@@ -2,6 +2,8 @@ package org.lioxa.ciel.node.impl;
 
 import org.lioxa.ciel.node.BinaryNode;
 import org.lioxa.ciel.node.Node;
+import org.lioxa.ciel.simplifier.Simplifiers;
+import org.lioxa.ciel.simplifier.impl.ZeroAsIdentitySimplifier;
 
 /**
  * Add node (Scalar + Matrix).
@@ -9,12 +11,19 @@ import org.lioxa.ciel.node.Node;
  * @author xi
  * @since Mar 12, 2016
  */
+@Simplifiers({ ZeroAsIdentitySimplifier.class })
 public class AddSMNode extends BinaryNode {
 
     @Override
     protected void initShape(Node input0, Node input1) {
         this.rowSize = input1.getRowSize();
         this.colSize = input1.getColumnSize();
+    }
+
+    @Override
+    public Node diff(Node diff, Node respectTo) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

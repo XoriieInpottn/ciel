@@ -12,4 +12,9 @@ public class VarNode extends LeafNode {
         this.colSize = colSize;
     }
 
+    @Override
+    public Node diff(Node diff, Node respectTo) {
+        throw new UnsupportedOperationException();
+    }
+
 }
