@@ -21,10 +21,10 @@ public class ZeroAsIdentitySimplifier implements Simplifier {
         }
         Node input0 = (Node) node.getInput(0);
         Node input1 = (Node) node.getInput(1);
-        if (NodeUtils.isAllZero(input0)) {
+        if (NodeUtils.isAllZero(input0) && (input0.isScalar() || input0.hasShape(input1))) {
             return input1;
         }
-        if (NodeUtils.isAllZero(input1)) {
+        if (NodeUtils.isAllZero(input1) && (input1.isScalar() || input1.hasShape(input0))) {
             return input0;
         }
         return node;

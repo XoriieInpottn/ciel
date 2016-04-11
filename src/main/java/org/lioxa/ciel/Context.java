@@ -324,6 +324,16 @@ public class Context {
     // Gradient.
     //
 
+    /**
+     * Compute gradient for "cost" with respect to a given node.
+     *
+     * @param cost
+     *            The cost node. <br/>
+     *            This node must be a scalar.
+     * @param respectTo
+     *            The node which the gradient is computed with respect to.
+     * @return The gradient node.
+     */
     public Node grad(Node cost, Node respectTo) {
         if (cost.getContext() != this || respectTo.getContext() != this) {
             throw new RuntimeException("Any of the nodes may not belong to this context.");
@@ -376,4 +386,5 @@ public class Context {
             return grad;
         }
     }
+
 }

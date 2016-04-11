@@ -21,10 +21,10 @@ public class OneAsIdentitySimplifier implements Simplifier {
         }
         Node input0 = (Node) node.getInput(0);
         Node input1 = (Node) node.getInput(1);
-        if (NodeUtils.isAllOne(input0)) {
+        if (NodeUtils.isAllOne(input0) && (input0.isScalar() || input0.hasShape(input1))) {
             return input1;
         }
-        if (NodeUtils.isAllOne(input1)) {
+        if (NodeUtils.isAllOne(input1) && (input1.isScalar() || input1.hasShape(input0))) {
             return input0;
         }
         return node;
