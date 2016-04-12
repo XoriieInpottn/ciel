@@ -141,9 +141,11 @@ public abstract class Node implements Term, HasMatrix, Executable {
     public abstract void build();
 
     //
-    // Differentiation.
+    // Simplify.
     //
 
-    public abstract Node diff(Node diff, Node respectTo);
+    public Node simplify() {
+        return this;
+    }
 
 }

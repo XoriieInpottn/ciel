@@ -1,7 +1,10 @@
 package org.lioxa.ciel.node.impl;
 
+import org.lioxa.ciel.binding.DefaultOperator;
 import org.lioxa.ciel.node.BinaryNode;
 import org.lioxa.ciel.node.Node;
+import org.lioxa.ciel.operator.impl.SubMSOperator;
+import org.lioxa.ciel.utils.NodeUtils;
 
 /**
  * Sub node (Matrix - Scalar).
@@ -9,12 +12,23 @@ import org.lioxa.ciel.node.Node;
  * @author xi
  * @since Mar 12, 2016
  */
+@DefaultOperator(SubMSOperator.class)
 public class SubMSNode extends BinaryNode {
 
     @Override
     protected void initShape(Node input0, Node input1) {
         this.rowSize = input0.getRowSize();
         this.colSize = input0.getColumnSize();
+    }
+
+    @Override
+    protected Node simplify(Node input0, Node input1) {
+        //
+        // [x] - 0
+        if (NodeUtils.isAllZero(input1)) {
+            return input0;
+        }
+        return this;
     }
 
     @Override

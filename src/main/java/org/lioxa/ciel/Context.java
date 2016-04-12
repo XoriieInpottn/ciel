@@ -1,12 +1,10 @@
 package org.lioxa.ciel;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
@@ -25,8 +23,10 @@ import org.lioxa.ciel.node.impl.AddMSNode;
 import org.lioxa.ciel.node.impl.AddNode;
 import org.lioxa.ciel.node.impl.AddSMNode;
 import org.lioxa.ciel.operator.Operator;
+import org.lioxa.ciel.operator.Operators;
 import org.lioxa.ciel.simplifier.Simplifier;
 import org.lioxa.ciel.simplifier.Simplifiers;
+import org.lioxa.ciel.simplifier.impl.ConstSimplifier;
 import org.lioxa.ciel.utils.Reflects;
 
 /**
@@ -43,6 +43,7 @@ public class Context {
 
     public Context() {
         this.bindOperators(DEFAULT_OPERATOR_PACKAGE);
+        this.simplifiers.add(Simplifiers.get(ConstSimplifier.class));
     }
 
     //
@@ -73,6 +74,7 @@ public class Context {
      * @param pkgName
      *            The package name.
      */
+    @SuppressWarnings("unchecked")
     public void bindOperators(String pkgName) {
         Collection<Class<?>> classes = Reflects.getClasses(pkgName, false);
         for (Class<?> clazz : classes) {
@@ -85,21 +87,31 @@ public class Context {
             }
             //
             // Then, create the operator instance.
-            Object instance;
+            Class<? extends Operator> operatorClass;
             try {
-                instance = clazz.newInstance();
-            } catch (InstantiationException | IllegalAccessException e) {
-                String msg = String.format("Failed to instance operator \"%s\".", clazz.getName());
+                operatorClass = (Class<? extends Operator>) clazz;
+            } catch (Exception e) {
+                String msg = String.format("\"%s\" is not a subclass of Operator.", clazz.getName());
                 throw new RuntimeException(msg, e);
             }
-            if (!(instance instanceof Operator)) {
-                String msg = String.format("\"%s\" is not a subclass of Operator.", clazz.getName());
-                throw new RuntimeException(msg);
-            }
+            Operator instance = Operators.get(operatorClass);
             //
             // At last, the operator instance is added.
-            this.bindingManager.addOperatorBinding(binding, (Operator) instance);
+            this.bindingManager.addOperatorBinding(binding, instance);
         }
+    }
+
+    public Operator matchOperator(InternalNode node) {
+        Class<? extends Node> target = node.getClass();
+        int inputSize = node.getInputSize();
+        @SuppressWarnings("unchecked")
+        Class<? extends RealMatrix>[] inputMatrixClasses = new Class[inputSize];
+        for (int i = 0; i < inputSize; i++) {
+            Node input = (Node) node.getInput(i);
+            input.build();
+            inputMatrixClasses[i] = input.getMatrix().getClass();
+        }
+        return this.bindingManager.matchOperator(target, inputMatrixClasses);
     }
 
     //
@@ -178,42 +190,17 @@ public class Context {
         return this.simplify(node);
     }
 
-    Map<Class<?>, Simplifier> simplifiers = new HashMap<>();
+    List<Simplifier> simplifiers = new LinkedList<>();
 
     Node simplify(InternalNode node) {
-        Simplifiers simsAnn = node.getClass().getAnnotation(Simplifiers.class);
-        if (simsAnn == null) {
-            return node;
-        }
-        Class<? extends Simplifier>[] sims = simsAnn.value();
-        if (sims == null || sims.length == 0) {
-            return node;
-        }
-        //
-        // Start simplify.
-        Node node1 = node;
-        for (Class<? extends Simplifier> simClass : sims) {
-            if (!(node1 instanceof InternalNode)) {
-                //
-                // Cannot simplify any non-internal nodes.
+        Node crtNode = node;
+        for (Simplifier sim : this.simplifiers) {
+            if (!(crtNode instanceof InternalNode)) {
                 break;
             }
-            //
-            // Get a singleton simplifier instance.
-            Simplifier sim = this.simplifiers.get(simClass);
-            if (sim == null) {
-                try {
-                    sim = simClass.newInstance();
-                } catch (InstantiationException | IllegalAccessException e) {
-                    String msg = String.format("Failed to create simplifier %s.", simClass.getName());
-                    throw new RuntimeException(msg, e);
-                }
-            }
-            //
-            // Do simplification.
-            node1 = sim.simplify((InternalNode) node1);
+            crtNode = sim.simplify((InternalNode) crtNode);
         }
-        return node1;
+        return crtNode.simplify();
     }
 
     /**
@@ -366,7 +353,7 @@ public class Context {
                 continue;
             }
             Node grad = this.grad(cost, output, availables);
-            grad = output.diff(grad, respectTo);
+            grad = ((InternalNode) output).diff(grad, respectTo);
             parts.add(grad);
         }
         switch (parts.size()) {

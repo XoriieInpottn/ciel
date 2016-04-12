@@ -32,6 +32,13 @@ public abstract class BinaryNode extends InternalNode {
         this.matrix = this.operator.createMatrix(this.rowSize, this.colSize);
     }
 
+    @Override
+    public Node simplify() {
+        return this.simplify(this.inputs[0], this.inputs[1]);
+    }
+
+    protected abstract Node simplify(Node input0, Node input1);
+
     //
     // Executable interface.
     //

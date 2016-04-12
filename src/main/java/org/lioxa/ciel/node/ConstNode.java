@@ -28,9 +28,4 @@ public class ConstNode extends LeafNode {
         MatrixUtils.copy(this.matrix, this.value);
     }
 
-    @Override
-    public Node diff(Node diff, Node respectTo) {
-        throw new UnsupportedOperationException();
-    }
-
 }

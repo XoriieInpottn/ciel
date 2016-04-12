@@ -1,10 +1,12 @@
 package org.lioxa.ciel.simplifier.impl;
 
+import org.lioxa.ciel.binding.DefaultOperator;
 import org.lioxa.ciel.matrix.RealMatrix;
 import org.lioxa.ciel.node.ConstNode;
 import org.lioxa.ciel.node.InternalNode;
 import org.lioxa.ciel.node.Node;
 import org.lioxa.ciel.operator.Operator;
+import org.lioxa.ciel.operator.Operators;
 import org.lioxa.ciel.simplifier.Simplifier;
 
 /**
@@ -33,12 +35,19 @@ public class ConstSimplifier implements Simplifier {
             inputMatrices[i] = input.getMatrix();
         }
         //
-        // execute operation
-        Operator operation = node.getOperator();
-        RealMatrix resultMatrix = operation.createMatrix(node.getRowSize(), node.getColumnSize());
-        operation.execute(resultMatrix, inputMatrices);
+        // Get operator.
+        DefaultOperator ann = node.getClass().getAnnotation(DefaultOperator.class);
+        Class<? extends Operator> operatorClass;
+        if (ann == null || (operatorClass = ann.value()) == null) {
+            return node;
+        }
+        Operator operator = Operators.get(operatorClass);
         //
-        // make result term
+        // Perform operation.
+        RealMatrix resultMatrix = operator.createMatrix(node.getRowSize(), node.getColumnSize());
+        operator.execute(resultMatrix, inputMatrices);
+        //
+        // Make result term.
         return node.getContext().newConst(resultMatrix);
     }
 

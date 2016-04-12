@@ -1,8 +1,6 @@
 package org.lioxa.ciel.node;
 
 import org.lioxa.ciel.HasOperator;
-import org.lioxa.ciel.binding.BindingManager;
-import org.lioxa.ciel.matrix.RealMatrix;
 import org.lioxa.ciel.operator.Operator;
 
 /**
@@ -48,18 +46,9 @@ public abstract class InternalNode extends Node implements HasOperator {
     public void build() {
         //
         // Get target, input matrix classes, and then match operator.
-        Class<? extends Node> target = this.getClass();
-        @SuppressWarnings("unchecked")
-        Class<? extends RealMatrix>[] inputMatrixClasses = new Class[this.inputs.length];
-        for (int i = 0; i < this.inputs.length; i++) {
-            Node input = this.inputs[i];
-            input.build();
-            inputMatrixClasses[i] = input.getMatrix().getClass();
-        }
-        BindingManager bindingManager = this.context.getBindingManager();
-        Operator operator = bindingManager.matchOperator(target, inputMatrixClasses);
+        Operator operator = this.context.matchOperator(this);
         if (operator == null) {
-            String msg = String.format("Failed to match operator for node %s.", target);
+            String msg = String.format("Failed to match operator for node %s.", this.getClass());
             throw new RuntimeException(msg);
         }
         //
@@ -68,5 +57,11 @@ public abstract class InternalNode extends Node implements HasOperator {
     }
 
     protected abstract void setOperator(Operator operator);
+
+    //
+    // Differentiation.
+    //
+
+    public abstract Node diff(Node diff, Node respectTo);
 
 }
