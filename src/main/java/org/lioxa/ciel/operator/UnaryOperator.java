@@ -9,7 +9,7 @@ import org.lioxa.ciel.matrix.RealMatrix;
  */
 public abstract class UnaryOperator extends Operator {
 
-    public abstract void execute(RealMatrix result, RealMatrix input);
+    public abstract void execute(RealMatrix result, RealMatrix input0);
 
     @Override
     public void execute(RealMatrix result, RealMatrix... inputs) {
