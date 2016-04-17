@@ -138,4 +138,41 @@ public class Reflects {
         return clazz == null ? -1 : dist;
     }
 
+    public boolean hasInterface(Class<?> clazz, Class<?> intr) {
+        while (clazz != null) {
+            for (Class<?> intr1 : clazz.getInterfaces()) {
+                if (intr1.equals(intr)) {
+                    return true;
+                }
+            }
+            clazz = clazz.getSuperclass();
+        }
+        return false;
+    }
+
+    public boolean hasSuper(Class<?> clazz, Class<?> superClass) {
+        while (clazz != null) {
+            if (clazz.equals(superClass)) {
+                return true;
+            }
+            clazz = clazz.getSuperclass();
+        }
+        return false;
+    }
+
+    public boolean implementationOf(Class<?> clazz, Class<?> superType) {
+        while (clazz != null) {
+            if (clazz.equals(superType)) {
+                return true;
+            }
+            for (Class<?> intr1 : clazz.getInterfaces()) {
+                if (intr1.equals(superType)) {
+                    return true;
+                }
+            }
+            clazz = clazz.getSuperclass();
+        }
+        return false;
+    }
+
 }
