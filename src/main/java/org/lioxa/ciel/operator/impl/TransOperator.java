@@ -11,7 +11,7 @@ import org.lioxa.ciel.operator.UnaryOperator;
  * @author xi
  * @since Apr 14, 2016
  */
-@OperatorBinding(target = TransNode.class, inputs = { RealMatrixImpl.class })
+@OperatorBinding(target = TransNode.class, inputs = { RealMatrixImpl.class }, output = RealMatrixImpl.class)
 public class TransOperator extends UnaryOperator {
 
     @Override
@@ -23,11 +23,6 @@ public class TransOperator extends UnaryOperator {
                 result.set(j, i, input0.get(i, j));
             }
         }
-    }
-
-    @Override
-    public RealMatrix createMatrix(int rowSize, int colSize) {
-        return new RealMatrixImpl(rowSize, colSize);
     }
 
 }

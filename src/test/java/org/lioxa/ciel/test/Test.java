@@ -4,8 +4,8 @@ import org.lioxa.ciel.Context;
 import org.lioxa.ciel.Executable;
 import org.lioxa.ciel.matrix.RealMatrix;
 import org.lioxa.ciel.node.Node;
+import org.lioxa.ciel.node.NodeUtils;
 import org.lioxa.ciel.node.impl.DotNode;
-import org.lioxa.ciel.utils.NodeUtils;
 
 /**
  *

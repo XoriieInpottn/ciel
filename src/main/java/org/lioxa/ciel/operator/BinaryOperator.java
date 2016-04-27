@@ -7,7 +7,7 @@ import org.lioxa.ciel.matrix.RealMatrix;
  * @author xi
  * @since Sep 26, 2015
  */
-public abstract class BinaryOperator extends Operator {
+public abstract class BinaryOperator implements Operator {
 
     public abstract void execute(RealMatrix result, RealMatrix input0, RealMatrix input1);
 

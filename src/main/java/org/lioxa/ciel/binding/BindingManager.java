@@ -25,10 +25,10 @@ public class BindingManager {
      *
      * @param binding
      *            The operator binding annotation.
-     * @param instance
-     *            The operator instance.
+     * @param operatorClass
+     *            The operator class.
      */
-    public void addOperatorBinding(OperatorBinding binding, Operator instance) {
+    public void addOperatorBinding(OperatorBinding binding, Class<? extends Operator> operatorClass) {
         //
         // Check arguments.
         Class<?> target = binding.target();
@@ -47,7 +47,7 @@ public class BindingManager {
         }
         //
         // Add (binding, instance) tuple to the list.
-        lst.add(new Object[] { binding, instance });
+        lst.add(new Object[] { binding, operatorClass });
     }
 
     /**
@@ -59,7 +59,8 @@ public class BindingManager {
      *            The input types of the operator.
      * @return
      */
-    public Operator matchOperator(Class<? extends Node> target, Class<? extends RealMatrix>[] inputs) {
+    @SuppressWarnings("unchecked")
+    public Class<? extends Operator> matchOperator(Class<? extends Node> target, Class<? extends RealMatrix>[] inputs) {
         //
         // Get the binding list.
         List<Object[]> lst = this.bindings.get(target);
@@ -70,7 +71,7 @@ public class BindingManager {
         // Start matching.
         int minDist = Integer.MAX_VALUE;
         OperatorBinding bestBinding = null;
-        Operator bestInstance = null;
+        Class<? extends Operator> bestClass = null;
         for (Object[] tuple : lst) {
             OperatorBinding binding1 = (OperatorBinding) tuple[0];
             Class<? extends RealMatrix>[] inputs1 = binding1.inputs();
@@ -99,10 +100,10 @@ public class BindingManager {
                 }
             }
             minDist = dist;
-            bestInstance = (Operator) tuple[1];
+            bestClass = (Class<? extends Operator>) tuple[1];
             bestBinding = binding1;
         }
-        return bestInstance;
+        return bestClass;
     }
 
 }

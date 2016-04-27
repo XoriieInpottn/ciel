@@ -138,7 +138,7 @@ public class Reflects {
         return clazz == null ? -1 : dist;
     }
 
-    public boolean hasInterface(Class<?> clazz, Class<?> intr) {
+    public static boolean hasInterface(Class<?> clazz, Class<?> intr) {
         while (clazz != null) {
             for (Class<?> intr1 : clazz.getInterfaces()) {
                 if (intr1.equals(intr)) {
@@ -150,7 +150,7 @@ public class Reflects {
         return false;
     }
 
-    public boolean hasSuper(Class<?> clazz, Class<?> superClass) {
+    public static boolean hasSuper(Class<?> clazz, Class<?> superClass) {
         while (clazz != null) {
             if (clazz.equals(superClass)) {
                 return true;
@@ -160,7 +160,7 @@ public class Reflects {
         return false;
     }
 
-    public boolean implementationOf(Class<?> clazz, Class<?> superType) {
+    public static boolean implementationOf(Class<?> clazz, Class<?> superType) {
         while (clazz != null) {
             if (clazz.equals(superType)) {
                 return true;

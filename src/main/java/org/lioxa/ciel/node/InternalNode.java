@@ -1,7 +1,9 @@
 package org.lioxa.ciel.node;
 
 import org.lioxa.ciel.HasOperator;
+import org.lioxa.ciel.matrix.MatrixUtils;
 import org.lioxa.ciel.operator.Operator;
+import org.lioxa.ciel.operator.Operators;
 
 /**
  *
@@ -46,14 +48,18 @@ public abstract class InternalNode extends Node implements HasOperator {
     public void build() {
         //
         // Get target, input matrix classes, and then match operator.
-        Operator operator = this.context.matchOperator(this);
-        if (operator == null) {
+        Class<? extends Operator> operatorClass = this.context.matchOperator(this);
+        if (operatorClass == null) {
             String msg = String.format("Failed to match operator for node %s.", this.getClass());
             throw new RuntimeException(msg);
         }
         //
-        // Set operator (and matrix).
+        // Set operator.
+        Operator operator = Operators.get(operatorClass);
         this.setOperator(operator);
+        //
+        // Set matrix.
+        this.matrix = MatrixUtils.createByOperator(operatorClass, this.rowSize, this.colSize);
     }
 
     protected abstract void setOperator(Operator operator);

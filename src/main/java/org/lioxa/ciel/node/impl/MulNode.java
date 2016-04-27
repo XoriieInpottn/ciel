@@ -3,8 +3,8 @@ package org.lioxa.ciel.node.impl;
 import org.lioxa.ciel.binding.DefaultOperator;
 import org.lioxa.ciel.node.BinaryNode;
 import org.lioxa.ciel.node.Node;
+import org.lioxa.ciel.node.NodeUtils;
 import org.lioxa.ciel.operator.impl.MulOperator;
-import org.lioxa.ciel.utils.NodeUtils;
 
 /**
  *

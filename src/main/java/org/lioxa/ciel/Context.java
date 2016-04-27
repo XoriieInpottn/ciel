@@ -23,7 +23,6 @@ import org.lioxa.ciel.node.impl.AddMSNode;
 import org.lioxa.ciel.node.impl.AddNode;
 import org.lioxa.ciel.node.impl.AddSMNode;
 import org.lioxa.ciel.operator.Operator;
-import org.lioxa.ciel.operator.Operators;
 import org.lioxa.ciel.simplifier.Simplifier;
 import org.lioxa.ciel.simplifier.Simplifiers;
 import org.lioxa.ciel.simplifier.impl.ConstSimplifier;
@@ -74,7 +73,6 @@ public class Context {
      * @param pkgName
      *            The package name.
      */
-    @SuppressWarnings("unchecked")
     public void bindOperators(String pkgName) {
         Collection<Class<?>> classes = Reflects.getClasses(pkgName, false);
         for (Class<?> clazz : classes) {
@@ -87,21 +85,19 @@ public class Context {
             }
             //
             // Then, create the operator instance.
-            Class<? extends Operator> operatorClass;
-            try {
-                operatorClass = (Class<? extends Operator>) clazz;
-            } catch (Exception e) {
+            if (!Reflects.hasInterface(clazz, Operator.class)) {
                 String msg = String.format("\"%s\" is not a subclass of Operator.", clazz.getName());
-                throw new RuntimeException(msg, e);
+                throw new RuntimeException(msg);
             }
-            Operator instance = Operators.get(operatorClass);
+            @SuppressWarnings("unchecked")
+            Class<? extends Operator> operatorClass = (Class<? extends Operator>) clazz;
             //
             // At last, the operator instance is added.
-            this.bindingManager.addOperatorBinding(binding, instance);
+            this.bindingManager.addOperatorBinding(binding, operatorClass);
         }
     }
 
-    public Operator matchOperator(InternalNode node) {
+    public Class<? extends Operator> matchOperator(InternalNode node) {
         Class<? extends Node> target = node.getClass();
         int inputSize = node.getInputSize();
         @SuppressWarnings("unchecked")

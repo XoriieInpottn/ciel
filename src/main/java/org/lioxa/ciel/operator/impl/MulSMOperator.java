@@ -11,7 +11,8 @@ import org.lioxa.ciel.operator.BinaryOperator;
  * @author xi
  * @since Apr 14, 2016
  */
-@OperatorBinding(target = MulSMNode.class, inputs = { RealMatrixImpl.class, RealMatrixImpl.class })
+@OperatorBinding(target = MulSMNode.class, inputs = { RealMatrixImpl.class,
+        RealMatrixImpl.class }, output = RealMatrixImpl.class)
 public class MulSMOperator extends BinaryOperator {
 
     @Override
@@ -24,11 +25,6 @@ public class MulSMOperator extends BinaryOperator {
                 result.set(i, j, scalar * input1.get(i, j));
             }
         }
-    }
-
-    @Override
-    public RealMatrix createMatrix(int rowSize, int colSize) {
-        return new RealMatrixImpl(rowSize, colSize);
     }
 
 }

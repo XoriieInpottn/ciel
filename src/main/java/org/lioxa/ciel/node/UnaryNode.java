@@ -29,7 +29,6 @@ public abstract class UnaryNode extends InternalNode {
             throw new IllegalArgumentException(msg);
         }
         this.operator = operator;
-        this.matrix = this.operator.createMatrix(this.rowSize, this.colSize);
     }
 
     @Override

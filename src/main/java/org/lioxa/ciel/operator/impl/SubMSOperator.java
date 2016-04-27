@@ -12,7 +12,8 @@ import org.lioxa.ciel.operator.BinaryOperator;
  * @author xi
  * @since Mar 12, 2016
  */
-@OperatorBinding(target = SubMSNode.class, inputs = { RealMatrixImpl.class, RealMatrixImpl.class })
+@OperatorBinding(target = SubMSNode.class, inputs = { RealMatrixImpl.class,
+        RealMatrixImpl.class }, output = RealMatrixImpl.class)
 public class SubMSOperator extends BinaryOperator {
 
     @Override
@@ -26,11 +27,6 @@ public class SubMSOperator extends BinaryOperator {
                 result.set(i, j, value);
             }
         }
-    }
-
-    @Override
-    public RealMatrix createMatrix(int rowSize, int colSize) {
-        return new RealMatrixImpl(rowSize, colSize);
     }
 
 }

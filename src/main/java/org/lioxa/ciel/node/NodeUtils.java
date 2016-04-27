@@ -1,10 +1,7 @@
-package org.lioxa.ciel.utils;
+package org.lioxa.ciel.node;
 
+import org.lioxa.ciel.matrix.MatrixUtils;
 import org.lioxa.ciel.matrix.RealMatrix;
-import org.lioxa.ciel.node.ConstNode;
-import org.lioxa.ciel.node.Node;
-import org.lioxa.ciel.node.OneNode;
-import org.lioxa.ciel.node.ZeroNode;
 
 /**
  *

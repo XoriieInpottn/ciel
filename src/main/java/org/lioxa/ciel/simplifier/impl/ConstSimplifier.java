@@ -1,6 +1,7 @@
 package org.lioxa.ciel.simplifier.impl;
 
 import org.lioxa.ciel.binding.DefaultOperator;
+import org.lioxa.ciel.matrix.MatrixUtils;
 import org.lioxa.ciel.matrix.RealMatrix;
 import org.lioxa.ciel.node.ConstNode;
 import org.lioxa.ciel.node.InternalNode;
@@ -44,7 +45,7 @@ public class ConstSimplifier implements Simplifier {
         Operator operator = Operators.get(operatorClass);
         //
         // Perform operation.
-        RealMatrix resultMatrix = operator.createMatrix(node.getRowSize(), node.getColumnSize());
+        RealMatrix resultMatrix = MatrixUtils.createByOperator(operatorClass, node.getRowSize(), node.getColumnSize());
         operator.execute(resultMatrix, inputMatrices);
         //
         // Make result term.

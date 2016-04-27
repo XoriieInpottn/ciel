@@ -11,7 +11,7 @@ import org.lioxa.ciel.operator.UnaryOperator;
  * @author xi
  * @since Apr 14, 2016
  */
-@OperatorBinding(target = SumNode.class, inputs = { RealMatrixImpl.class })
+@OperatorBinding(target = SumNode.class, inputs = { RealMatrixImpl.class }, output = RealMatrixImpl.class)
 public class SumOperator extends UnaryOperator {
 
     @Override
@@ -25,11 +25,6 @@ public class SumOperator extends UnaryOperator {
             }
         }
         result.set(0, 0, sum);
-    }
-
-    @Override
-    public RealMatrix createMatrix(int rowSize, int colSize) {
-        return new RealMatrixImpl(rowSize, colSize);
     }
 
 }

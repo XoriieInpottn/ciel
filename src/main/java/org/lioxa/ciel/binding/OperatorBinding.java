@@ -29,11 +29,18 @@ public @interface OperatorBinding {
     Class<? extends Node> target();
 
     /**
-     * Matrix classes.
+     * input matrix classes.
      *
      * @return The matrix classes.
      */
     Class<? extends RealMatrix>[] inputs();
+
+    /**
+     * Output matrix class.
+     *
+     * @return The matrix class.
+     */
+    Class<? extends RealMatrix> output();
 
     /**
      * Rating. <br/>
