@@ -1,7 +1,6 @@
 package org.lioxa.ciel.node;
 
-import java.lang.reflect.Constructor;
-
+import org.lioxa.ciel.matrix.MatrixUtils;
 import org.lioxa.ciel.matrix.RealMatrix;
 
 /**
@@ -17,6 +16,7 @@ public abstract class LeafNode extends Node {
 
     @Override
     public RealMatrix execute() {
+        this.isExpired = false;
         return this.matrix;
     }
 
@@ -29,20 +29,11 @@ public abstract class LeafNode extends Node {
         }
         //
         // Usually, the matrix is created automatically.
+        //
+        // This requires all implementations of RealMatrix have a
+        // constructor like "constructor(int rowSize, int colSize)".
         Class<? extends RealMatrix> matrixClass = this.context.getDefaultMatrixClass();
-        try {
-            Constructor<? extends RealMatrix> c;
-            //
-            // This requires all implementations of RealMatrix have a
-            // constructor like "constructor(int rowSize, int colSize)".
-            c = matrixClass.getConstructor(int.class, int.class);
-            this.matrix = c.newInstance(this.rowSize, this.colSize);
-        } catch (Exception e) {
-            String matrixName = matrixClass.getName();
-            String nodeName = this.getClass().getName();
-            String msg = String.format("Failed to create instance of %s for %s.", matrixName, nodeName);
-            throw new RuntimeException(msg, e);
-        }
+        this.matrix = MatrixUtils.createByClass(matrixClass, this.rowSize, this.colSize);
     }
 
 }

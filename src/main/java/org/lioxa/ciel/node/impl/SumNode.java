@@ -32,8 +32,8 @@ public class SumNode extends UnaryNode {
         if (!respectTo.equals(input0)) {
             throw new IllegalStateException();
         }
-        Node one = context.newOne(input0.getRowSize(), input0.getColumnSize());
-        return context.newOpt(MulSMNode.class, diff, one);
+        Node one = context.oneNode(input0.getRowSize(), input0.getColumnSize());
+        return context.internalNode(MulSMNode.class, diff, one);
     }
 
 }

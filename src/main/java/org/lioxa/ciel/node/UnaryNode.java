@@ -44,16 +44,19 @@ public abstract class UnaryNode extends InternalNode {
 
     @Override
     public RealMatrix execute() {
-        //
-        // Get the input matrices.
-        Node input0 = this.inputs[0];
-        if (input0.isExpired) {
-            input0.execute();
+        if (this.isExpired) {
+            System.out.println("Unary node executed.");
+            //
+            // Get the input matrices.
+            Node input0 = this.inputs[0];
+            RealMatrix matrix0 = input0.execute();
+            //
+            // Execute the operator.
+            ((UnaryOperator) this.operator).execute(this.matrix, matrix0);
+            //
+            // Set expired to false.
+            this.isExpired = false;
         }
-        RealMatrix matrix0 = input0.getMatrix();
-        //
-        // Execute the operator.
-        ((UnaryOperator) this.operator).execute(this.matrix, matrix0);
         return this.matrix;
     }
 

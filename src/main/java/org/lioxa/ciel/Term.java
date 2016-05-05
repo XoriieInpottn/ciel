@@ -1,6 +1,5 @@
 package org.lioxa.ciel;
 
-
 /**
  * The {@link Term} is the basic element to form a expression. <br/>
  * The root {@link Term} must be compiled before execute it.

@@ -21,7 +21,7 @@ public abstract class InternalNode extends Node implements HasOperator {
      * @param inputs
      *            The input nodes.
      */
-    public void setInputs(Node[] inputs) {
+    public void setInputs(Node... inputs) {
         if (this.inputs != null) {
             throw new IllegalStateException("Inputs has been set.");
         }

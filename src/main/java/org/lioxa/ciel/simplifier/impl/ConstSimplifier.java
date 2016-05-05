@@ -32,8 +32,8 @@ public class ConstSimplifier implements Simplifier {
         // get input values
         RealMatrix[] inputMatrices = new RealMatrix[inputSize];
         for (int i = 0; i < inputSize; i++) {
-            Node input = (Node) node.getInput(i);
-            inputMatrices[i] = input.getMatrix();
+            ConstNode input = (ConstNode) node.getInput(i);
+            inputMatrices[i] = input.getValue();
         }
         //
         // Get operator.
@@ -49,7 +49,7 @@ public class ConstSimplifier implements Simplifier {
         operator.execute(resultMatrix, inputMatrices);
         //
         // Make result term.
-        return node.getContext().newConst(resultMatrix);
+        return node.getContext().constNode(resultMatrix);
     }
 
 }

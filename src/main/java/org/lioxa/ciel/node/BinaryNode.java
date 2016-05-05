@@ -44,21 +44,21 @@ public abstract class BinaryNode extends InternalNode {
 
     @Override
     public RealMatrix execute() {
-        //
-        // Get the input matrices.
-        Node input0 = this.inputs[0];
-        Node input1 = this.inputs[1];
-        if (input0.isExpired) {
-            input0.execute();
+        if (this.isExpired) {
+            System.out.println("Binary node executed.");
+            //
+            // Get the input matrices.
+            Node input0 = this.inputs[0];
+            Node input1 = this.inputs[1];
+            RealMatrix matrix0 = input0.execute();
+            RealMatrix matrix1 = input1.execute();
+            //
+            // Execute the operator.
+            ((BinaryOperator) this.operator).execute(this.matrix, matrix0, matrix1);
+            //
+            // Set expired to false.
+            this.isExpired = false;
         }
-        if (input1.isExpired) {
-            input1.execute();
-        }
-        RealMatrix matrix0 = input0.getMatrix();
-        RealMatrix matrix1 = input1.getMatrix();
-        //
-        // Execute the operator.
-        ((BinaryOperator) this.operator).execute(this.matrix, matrix0, matrix1);
         return this.matrix;
     }
 

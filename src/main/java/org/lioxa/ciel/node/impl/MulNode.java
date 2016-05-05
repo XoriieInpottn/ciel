@@ -1,5 +1,6 @@
 package org.lioxa.ciel.node.impl;
 
+import org.lioxa.ciel.Context;
 import org.lioxa.ciel.binding.DefaultOperator;
 import org.lioxa.ciel.node.BinaryNode;
 import org.lioxa.ciel.node.Node;
@@ -33,7 +34,25 @@ public class MulNode extends BinaryNode {
 
     @Override
     public Node diff(Node diff, Node respectTo) {
-        return null;
+        Context context = this.context;
+        Node input0 = this.inputs[0];
+        Node input1 = this.inputs[1];
+        Node r;
+        if (respectTo.equals(input0)) {
+            if (respectTo.equals(input1)) {
+                Node partial = context.internalNode(AddNode.class, respectTo, respectTo);
+                r = context.internalNode(MulNode.class, diff, partial);
+            } else {
+                r = context.internalNode(MulNode.class, diff, input1);
+            }
+        } else {
+            if (respectTo.equals(input1)) {
+                r = context.internalNode(MulNode.class, input0, diff);
+            } else {
+                throw new IllegalStateException();
+            }
+        }
+        return r;
     }
 
 }

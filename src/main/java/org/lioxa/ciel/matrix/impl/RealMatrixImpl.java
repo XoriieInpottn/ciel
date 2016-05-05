@@ -87,6 +87,16 @@ public class RealMatrixImpl implements RealMatrix {
         }
     }
 
+    @Override
+    public void set(RealMatrix value) {
+        for (int i = 0; i < this.values.length; i++) {
+            double[] row = this.values[i];
+            for (int j = 0; j < row.length; j++) {
+                row[j] = value.get(i, j);
+            }
+        }
+    }
+
     //
     // Convert to string.
     //

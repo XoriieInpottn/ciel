@@ -73,6 +73,11 @@ public class SingleValueMatrix implements RealMatrix {
         this.value = value;
     }
 
+    @Override
+    public void set(RealMatrix value) {
+        throw new UnsupportedOperationException("Cannot set value to SingleValueMatrix.");
+    }
+
     //
     // Convert to string.
     //

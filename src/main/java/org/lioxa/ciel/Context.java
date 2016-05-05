@@ -15,13 +15,24 @@ import org.lioxa.ciel.matrix.impl.RealMatrixImpl;
 import org.lioxa.ciel.matrix.impl.SingleValueMatrix;
 import org.lioxa.ciel.node.ConstNode;
 import org.lioxa.ciel.node.InternalNode;
+import org.lioxa.ciel.node.LeafNode;
 import org.lioxa.ciel.node.Node;
 import org.lioxa.ciel.node.OneNode;
+import org.lioxa.ciel.node.UpdateNode;
 import org.lioxa.ciel.node.VarNode;
 import org.lioxa.ciel.node.ZeroNode;
 import org.lioxa.ciel.node.impl.AddMSNode;
 import org.lioxa.ciel.node.impl.AddNode;
 import org.lioxa.ciel.node.impl.AddSMNode;
+import org.lioxa.ciel.node.impl.DotNode;
+import org.lioxa.ciel.node.impl.MulMSNode;
+import org.lioxa.ciel.node.impl.MulNode;
+import org.lioxa.ciel.node.impl.MulSMNode;
+import org.lioxa.ciel.node.impl.SubMSNode;
+import org.lioxa.ciel.node.impl.SubNode;
+import org.lioxa.ciel.node.impl.SubSMNode;
+import org.lioxa.ciel.node.impl.SumNode;
+import org.lioxa.ciel.node.impl.TransNode;
 import org.lioxa.ciel.operator.Operator;
 import org.lioxa.ciel.simplifier.Simplifier;
 import org.lioxa.ciel.simplifier.Simplifiers;
@@ -97,7 +108,7 @@ public class Context {
         }
     }
 
-    public Class<? extends Operator> matchOperator(InternalNode node) {
+    public Class<? extends Operator> matchOperator(Node node) {
         Class<? extends Node> target = node.getClass();
         int inputSize = node.getInputSize();
         @SuppressWarnings("unchecked")
@@ -114,38 +125,201 @@ public class Context {
     // Graph management.
     //
 
+    public VarTerm newVar(int rowSize, int colSize) {
+        return this.varNode(rowSize, colSize);
+    }
+
+    public ConstTerm newConst(RealMatrix value) {
+        return this.constNode(value);
+    }
+
+    public ConstTerm newConst(int rowSize, int colSize, double value) {
+        return this.constNode(rowSize, colSize, value);
+    }
+
+    public ConstTerm newOne(int rowSize, int colSize) {
+        return this.oneNode(rowSize, colSize);
+    }
+
+    public ConstTerm newZero(int rowSize, int colSize) {
+        return this.zeroNode(rowSize, colSize);
+    }
+
+    /**
+     * Add.
+     *
+     * @param input0
+     *            The input0.
+     * @param input1
+     *            The input1.
+     * @return The term that represent the result.
+     */
+    public Term add(Term input0, Term input1) {
+        Term term;
+        if (input0.hasShape(input1)) {
+            term = this.internalNode(AddNode.class, (Node) input0, (Node) input1);
+        } else {
+            if (input0.isScalar()) {
+                //
+                // SM case.
+                term = this.internalNode(AddSMNode.class, (Node) input0, (Node) input1);
+            } else if (input1.isScalar()) {
+                //
+                // MS case.
+                term = this.internalNode(AddMSNode.class, (Node) input0, (Node) input1);
+            } else {
+                //
+                // MM case, but they do not have the same shape.
+                String shape0 = String.format("(%d, %d)", input0.getRowSize(), input0.getColumnSize());
+                String shape1 = String.format("(%d, %d)", input1.getRowSize(), input1.getColumnSize());
+                String msg = String.format("Invalid shapes %s and %s for add.", shape0, shape1);
+                throw new RuntimeException(msg);
+            }
+        }
+        return term;
+    }
+
+    /**
+     * Sub.
+     *
+     * @param input0
+     *            The input0.
+     * @param input1
+     *            The input1.
+     * @return The term that represent the result.
+     */
+    public Term sub(Term input0, Term input1) {
+        Term term;
+        if (input0.hasShape(input1)) {
+            term = this.internalNode(SubNode.class, (Node) input0, (Node) input1);
+        } else {
+            if (input0.isScalar()) {
+                //
+                // SM case.
+                term = this.internalNode(SubSMNode.class, (Node) input0, (Node) input1);
+            } else if (input1.isScalar()) {
+                //
+                // MS case.
+                term = this.internalNode(SubMSNode.class, (Node) input0, (Node) input1);
+            } else {
+                //
+                // MM case, but they do not have the same shape.
+                String shape0 = String.format("(%d, %d)", input0.getRowSize(), input0.getColumnSize());
+                String shape1 = String.format("(%d, %d)", input1.getRowSize(), input1.getColumnSize());
+                String msg = String.format("Invalid shapes %s and %s for sub.", shape0, shape1);
+                throw new RuntimeException(msg);
+            }
+        }
+        return term;
+    }
+
+    /**
+     * Multiply.
+     *
+     * @param input0
+     *            The input0.
+     * @param input1
+     *            The input1.
+     * @return The term that represent the result.
+     */
+    public Term mul(Term input0, Term input1) {
+        Term term;
+        if (input0.hasShape(input1)) {
+            term = this.internalNode(MulNode.class, (Node) input0, (Node) input1);
+        } else {
+            if (input0.isScalar()) {
+                //
+                // SM case.
+                term = this.internalNode(MulSMNode.class, (Node) input0, (Node) input1);
+            } else if (input1.isScalar()) {
+                //
+                // MS case.
+                term = this.internalNode(MulMSNode.class, (Node) input0, (Node) input1);
+            } else {
+                //
+                // MM case, but they do not have the same shape.
+                String shape0 = String.format("(%d, %d)", input0.getRowSize(), input0.getColumnSize());
+                String shape1 = String.format("(%d, %d)", input1.getRowSize(), input1.getColumnSize());
+                String msg = String.format("Invalid shapes %s and %s for mul.", shape0, shape1);
+                throw new RuntimeException(msg);
+            }
+        }
+        return term;
+    }
+
+    /**
+     * Dot.
+     *
+     * @param input0
+     *            The input0.
+     * @param input1
+     *            The input1.
+     * @return The term that represent the result.
+     */
+    public Term dot(Term input0, Term input1) {
+        if (input0.getColumnSize() != input1.getRowSize()) {
+            String shape0 = String.format("(%d, %d)", input0.getRowSize(), input0.getColumnSize());
+            String shape1 = String.format("(%d, %d)", input1.getRowSize(), input1.getColumnSize());
+            String msg = String.format("Invalid shapes %s and %s for dot.", shape0, shape1);
+            throw new RuntimeException(msg);
+        }
+        return this.internalNode(DotNode.class, (Node) input0, (Node) input1);
+    }
+
+    /**
+     * Transpose.
+     *
+     * @param input0
+     *            The input0.
+     * @return The term that represent the result.
+     */
+    public Term trans(Term input0) {
+        return this.internalNode(TransNode.class, (Node) input0);
+    }
+
+    /**
+     * Sum of the matrix.
+     *
+     * @param input0
+     *            The input0.
+     * @return The term that represent the result.
+     */
+    public Term sum(Term input0) {
+        return this.internalNode(SumNode.class, (Node) input0);
+    }
+
     WeakHashMap<Class<? extends Node>, WeakHashMap<Node, Object>> graph = new WeakHashMap<>();
 
-    public Node newVar(int rowSize, int colSize) {
-        Node node = new VarNode(rowSize, colSize);
+    public VarNode varNode(int rowSize, int colSize) {
+        VarNode node = new VarNode(rowSize, colSize);
         node.setContext(this);
         this.insertGraph(node);
         return node;
     }
 
-    public Node newConst(RealMatrix value) {
-        Node node = new ConstNode(value);
+    public ConstNode constNode(RealMatrix value) {
+        ConstNode node = new ConstNode(value);
         node.setContext(this);
         this.insertGraph(node);
         return node;
     }
 
-    public Node newConst(int rowSize, int colSize, double value) {
-        Node node = new ConstNode(new SingleValueMatrix(rowSize, colSize, value));
+    public ConstNode constNode(int rowSize, int colSize, double value) {
+        ConstNode node = new ConstNode(new SingleValueMatrix(rowSize, colSize, value));
         node.setContext(this);
         this.insertGraph(node);
         return node;
     }
 
-    public Node newOne(int rowSize, int colSize) {
-        Node node = new OneNode(rowSize, colSize);
+    public OneNode oneNode(int rowSize, int colSize) {
+        OneNode node = new OneNode(rowSize, colSize);
         node.setContext(this);
         this.insertGraph(node);
         return node;
     }
 
-    public Node newZero(int rowSize, int colSize) {
-        Node node = new ZeroNode(rowSize, colSize);
+    public ZeroNode zeroNode(int rowSize, int colSize) {
+        ZeroNode node = new ZeroNode(rowSize, colSize);
         node.setContext(this);
         this.insertGraph(node);
         return node;
@@ -161,7 +335,7 @@ public class Context {
      * @return A node. It may be a new created node or an existing node in the
      *         context.
      */
-    public Node newOpt(Class<? extends InternalNode> clazz, Node... inputs) {
+    public Node internalNode(Class<? extends InternalNode> clazz, Node... inputs) {
         InternalNode node = (InternalNode) this.queryGraph(clazz, inputs);
         if (node != null) {
             return node;
@@ -186,17 +360,43 @@ public class Context {
         return this.simplify(node);
     }
 
+    public Node updateNode(Class<? extends UpdateNode> clazz, Node target, Node input) {
+        UpdateNode node = (UpdateNode) this.queryGraph(clazz, target, input);
+        if (node != null) {
+            return node;
+        }
+        //
+        // If this kind of node has never been created, created it now.
+        try {
+            node = clazz.newInstance();
+        } catch (InstantiationException | IllegalAccessException e) {
+            String msg = String.format("Failed to create node %s.", clazz.getName());
+            throw new RuntimeException(msg, e);
+        }
+        //
+        // Then, set the basic info to it.
+        node.setContext(this);
+        node.setInputs(target, input);
+        //
+        // And insert it into the global graph.
+        this.insertGraph(node);
+        //
+        // At last, the node is simplified, and return.
+        return this.simplify(node);
+    }
+
     List<Simplifier> simplifiers = new LinkedList<>();
 
-    Node simplify(InternalNode node) {
-        Node crtNode = node;
+    Node simplify(Node node) {
         for (Simplifier sim : this.simplifiers) {
-            if (!(crtNode instanceof InternalNode)) {
+            if (node instanceof LeafNode) {
                 break;
             }
-            crtNode = sim.simplify((InternalNode) crtNode);
+            //
+            // TODO: Update nodes may have problems here.
+            node = sim.simplify((InternalNode) node);
         }
-        return crtNode.simplify();
+        return node.simplify();
     }
 
     /**
@@ -248,39 +448,6 @@ public class Context {
         nodes.put(node, null);
     }
 
-    /**
-     * Add.
-     *
-     * @param input0
-     *            The input0.
-     * @param input1
-     *            The input1.
-     * @return The term that represent the result.
-     */
-    public Term add(Term input0, Term input1) {
-        Term term;
-        if (input0.hasShape(input1)) {
-            term = this.newOpt(AddNode.class, (Node) input0, (Node) input1);
-        } else {
-            if (input0.isScalar()) {
-                //
-                // SM case.
-                term = this.newOpt(AddSMNode.class, (Node) input0, (Node) input1);
-            } else if (input1.isScalar()) {
-                //
-                // MS case.
-                term = this.newOpt(AddMSNode.class, (Node) input0, (Node) input1);
-            } else {
-                //
-                // MM case, but they do not have the same shape.
-                // TODO: Detail information must be given.
-                String msg = String.format("Invalid shapes for add.");
-                throw new RuntimeException(msg);
-            }
-        }
-        return term;
-    }
-
     //
     // Build.
     //
@@ -318,37 +485,63 @@ public class Context {
      * @return The gradient node.
      */
     public Node grad(Node cost, Node respectTo) {
+        //
+        // Check context
         if (cost.getContext() != this || respectTo.getContext() != this) {
             throw new RuntimeException("Any of the nodes may not belong to this context.");
         }
-        Set<Node> availables = new HashSet<>();
-        List<Node> queue = new LinkedList<>();
-        queue.add(cost);
-        while (!queue.isEmpty()) {
-            Node node = queue.remove(0);
-            availables.add(node);
-            int inputSize = node.getInputSize();
-            for (int i = 0; i < inputSize; i++) {
-                queue.add((Node) node.getInput(i));
-            }
-        }
-        if (!availables.contains(respectTo)) {
+        //
+        // Get tree nodes.
+        Set<Node> treeNodes = new HashSet<>();
+        getTreeNodes(cost, treeNodes);
+        //
+        // If the node that with respect to is in the tree.
+        if (!treeNodes.contains(respectTo)) {
             String msg = String.format("%s is not a component of %.", respectTo, cost);
             throw new RuntimeException(msg);
         }
-        return this.grad(cost, respectTo, availables);
+        //
+        // Get the gradient.
+        return this.grad(cost, respectTo, treeNodes);
     }
 
-    Node grad(Node cost, Node respectTo, Set<Node> availables) {
+    /**
+     * Get tree nodes for the given root.
+     *
+     * @param root
+     *            The root node.
+     * @param treeNodes
+     *            The result collection of tree nodes.
+     */
+    static void getTreeNodes(Node root, Collection<Node> treeNodes) {
+        treeNodes.add(root);
+        int size = root.getInputSize();
+        for (int i = 0; i < size; i++) {
+            getTreeNodes((Node) root.getInput(i), treeNodes);
+        }
+    }
+
+    /**
+     * Get gradient for the given cost with respect to the given node.
+     *
+     * @param cost
+     *            The cost node.
+     * @param respectTo
+     *            The node that with respect to.
+     * @param treeNodes
+     *            The tree nodes of cost node.
+     * @return The gradient node.
+     */
+    Node grad(Node cost, Node respectTo, Set<Node> treeNodes) {
         if (respectTo.equals(cost)) {
-            return this.newOne(1, 1);
+            return this.oneNode(1, 1);
         }
         List<Node> parts = new LinkedList<>();
         for (Node output : respectTo.getOutputs()) {
-            if (!availables.contains(output)) {
+            if (!treeNodes.contains(output)) {
                 continue;
             }
-            Node grad = this.grad(cost, output, availables);
+            Node grad = this.grad(cost, output, treeNodes);
             grad = ((InternalNode) output).diff(grad, respectTo);
             parts.add(grad);
         }
@@ -364,7 +557,7 @@ public class Context {
             Node grad = iter.next();
             while (iter.hasNext()) {
                 Node grad1 = iter.next();
-                grad = this.newOpt(AddNode.class, grad, grad1);
+                grad = this.internalNode(AddNode.class, grad, grad1);
             }
             return grad;
         }

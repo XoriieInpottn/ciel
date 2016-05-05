@@ -42,4 +42,6 @@ public interface RealMatrix extends HasShape {
      */
     void set(double value);
 
+    void set(RealMatrix value);
+
 }

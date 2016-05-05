@@ -32,19 +32,19 @@ public class DotNode extends BinaryNode {
         Node input1 = this.inputs[1];
         if (respectTo.equals(input0)) {
             if (respectTo.equals(input1)) {
-                Node trans1 = context.newOpt(TransNode.class, input1);
-                Node diff0 = context.newOpt(DotNode.class, diff, trans1);
-                Node trans0 = context.newOpt(TransNode.class, input0);
-                Node diff1 = context.newOpt(DotNode.class, trans0, diff);
-                return context.newOpt(AddNode.class, diff0, diff1);
+                Node trans1 = context.internalNode(TransNode.class, input1);
+                Node diff0 = context.internalNode(DotNode.class, diff, trans1);
+                Node trans0 = context.internalNode(TransNode.class, input0);
+                Node diff1 = context.internalNode(DotNode.class, trans0, diff);
+                return context.internalNode(AddNode.class, diff0, diff1);
             } else {
-                Node trans1 = context.newOpt(TransNode.class, input1);
-                return context.newOpt(DotNode.class, diff, trans1);
+                Node trans1 = context.internalNode(TransNode.class, input1);
+                return context.internalNode(DotNode.class, diff, trans1);
             }
         } else {
             if (respectTo.equals(input1)) {
-                Node trans0 = context.newOpt(TransNode.class, input0);
-                return context.newOpt(DotNode.class, trans0, diff);
+                Node trans0 = context.internalNode(TransNode.class, input0);
+                return context.internalNode(DotNode.class, trans0, diff);
             } else {
                 throw new IllegalStateException();
             }

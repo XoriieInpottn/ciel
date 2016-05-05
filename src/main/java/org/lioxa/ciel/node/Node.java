@@ -131,7 +131,13 @@ public abstract class Node implements Term, HasMatrix, Executable {
 
     @Override
     public void setExpired() {
+        if (this.isExpired) {
+            return;
+        }
         this.isExpired = true;
+        for (Node output : this.outputs.keySet()) {
+            output.setExpired();
+        }
     }
 
     //
@@ -146,6 +152,16 @@ public abstract class Node implements Term, HasMatrix, Executable {
 
     public Node simplify() {
         return this;
+    }
+
+    //
+    //
+    //
+
+    @Override
+    public String toString() {
+        String shape = String.format("(%d, %d)", this.rowSize, this.colSize);
+        return String.format("%s: %s", this.getClass().getName(), shape);
     }
 
 }
