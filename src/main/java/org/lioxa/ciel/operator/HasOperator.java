@@ -1,6 +1,4 @@
-package org.lioxa.ciel;
-
-import org.lioxa.ciel.operator.Operator;
+package org.lioxa.ciel.operator;
 
 /**
  * The {@link HasOperator} interface describe a series of nodes which can

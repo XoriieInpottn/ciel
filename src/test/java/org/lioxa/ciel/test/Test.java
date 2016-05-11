@@ -59,7 +59,7 @@ public class Test {
         System.out.println(mx);
         System.out.println(my);
         System.out.println(exe.execute());
-        Node grad = context.grad((Node) r, (Node) x);
+        Node grad = context.diff((Node) r, (Node) x);
         System.out.println("x = " + x);
         System.out.println("y = " + y);
         NodeUtils.printNodeTree(grad, 0);

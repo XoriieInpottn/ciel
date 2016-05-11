@@ -6,9 +6,9 @@ import java.util.WeakHashMap;
 
 import org.lioxa.ciel.Context;
 import org.lioxa.ciel.Executable;
-import org.lioxa.ciel.HasMatrix;
 import org.lioxa.ciel.HasShape;
 import org.lioxa.ciel.Term;
+import org.lioxa.ciel.matrix.HasMatrix;
 import org.lioxa.ciel.matrix.RealMatrix;
 
 /**

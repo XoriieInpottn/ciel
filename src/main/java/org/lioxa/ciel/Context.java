@@ -1,15 +1,14 @@
 package org.lioxa.ciel;
 
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import java.util.WeakHashMap;
 
 import org.lioxa.ciel.binding.BindingManager;
 import org.lioxa.ciel.binding.OperatorBinding;
+import org.lioxa.ciel.gradient.Differentiable;
+import org.lioxa.ciel.gradient.Gradient;
 import org.lioxa.ciel.matrix.RealMatrix;
 import org.lioxa.ciel.matrix.impl.RealMatrixImpl;
 import org.lioxa.ciel.matrix.impl.SingleValueMatrix;
@@ -47,7 +46,7 @@ import org.lioxa.ciel.utils.Reflects;
  * @author xi
  * @since Sep 25, 2015
  */
-public class Context {
+public class Context implements Differentiable {
 
     public static final String DEFAULT_OPERATOR_PACKAGE = "org.lioxa.ciel.operator.impl";
 
@@ -471,96 +470,19 @@ public class Context {
     }
 
     //
-    // Gradient.
+    // Differentiable interface.
     //
 
-    /**
-     * Compute gradient for "cost" with respect to a given node.
-     *
-     * @param cost
-     *            The cost node. <br/>
-     *            This node must be a scalar.
-     * @param respectTo
-     *            The node which the gradient is computed with respect to.
-     * @return The gradient node.
-     */
-    public Node grad(Node cost, Node respectTo) {
-        //
-        // Check context
-        if (cost.getContext() != this || respectTo.getContext() != this) {
-            throw new RuntimeException("Any of the nodes may not belong to this context.");
-        }
-        //
-        // Get tree nodes.
-        Set<Node> treeNodes = new HashSet<>();
-        getTreeNodes(cost, treeNodes);
-        //
-        // If the node that with respect to is in the tree.
-        if (!treeNodes.contains(respectTo)) {
-            String msg = String.format("%s is not a component of %.", respectTo, cost);
-            throw new RuntimeException(msg);
-        }
-        //
-        // Get the gradient.
-        return this.grad(cost, respectTo, treeNodes);
+    Gradient gradient = new Gradient(this);
+
+    @Override
+    public Node diff(Node cost, Node respectTo) {
+        return this.gradient.diff(cost, respectTo);
     }
 
-    /**
-     * Get tree nodes for the given root.
-     *
-     * @param root
-     *            The root node.
-     * @param treeNodes
-     *            The result collection of tree nodes.
-     */
-    static void getTreeNodes(Node root, Collection<Node> treeNodes) {
-        treeNodes.add(root);
-        int size = root.getInputSize();
-        for (int i = 0; i < size; i++) {
-            getTreeNodes((Node) root.getInput(i), treeNodes);
-        }
-    }
-
-    /**
-     * Get gradient for the given cost with respect to the given node.
-     *
-     * @param cost
-     *            The cost node.
-     * @param respectTo
-     *            The node that with respect to.
-     * @param treeNodes
-     *            The tree nodes of cost node.
-     * @return The gradient node.
-     */
-    Node grad(Node cost, Node respectTo, Set<Node> treeNodes) {
-        if (respectTo.equals(cost)) {
-            return this.oneNode(1, 1);
-        }
-        List<Node> parts = new LinkedList<>();
-        for (Node output : respectTo.getOutputs()) {
-            if (!treeNodes.contains(output)) {
-                continue;
-            }
-            Node grad = this.grad(cost, output, treeNodes);
-            grad = ((InternalNode) output).diff(grad, respectTo);
-            parts.add(grad);
-        }
-        switch (parts.size()) {
-        case 0:
-            String msg = String.format("%s is not a component of %.", respectTo, cost);
-            throw new RuntimeException(msg);
-        case 1:
-            return parts.get(0);
-        default:
-            Iterator<Node> iter = parts.iterator();
-            iter.hasNext();
-            Node grad = iter.next();
-            while (iter.hasNext()) {
-                Node grad1 = iter.next();
-                grad = this.internalNode(AddNode.class, grad, grad1);
-            }
-            return grad;
-        }
+    @Override
+    public Node[] grad(Node cost, Node... respectTo) {
+        return this.gradient.grad(cost, respectTo);
     }
 
 }

@@ -1,6 +1,4 @@
-package org.lioxa.ciel;
-
-import org.lioxa.ciel.matrix.RealMatrix;
+package org.lioxa.ciel.matrix;
 
 /**
  * The {@link HasMatrix} interface is used to describe objects that contain a

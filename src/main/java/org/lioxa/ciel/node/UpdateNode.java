@@ -1,7 +1,7 @@
 package org.lioxa.ciel.node;
 
-import org.lioxa.ciel.HasOperator;
 import org.lioxa.ciel.matrix.RealMatrix;
+import org.lioxa.ciel.operator.HasOperator;
 import org.lioxa.ciel.operator.Operator;
 import org.lioxa.ciel.operator.Operators;
 import org.lioxa.ciel.operator.UnaryOperator;
