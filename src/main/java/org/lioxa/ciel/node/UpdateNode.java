@@ -7,11 +7,16 @@ import org.lioxa.ciel.operator.Operators;
 import org.lioxa.ciel.operator.UnaryOperator;
 
 /**
+ * {@link UpdateNode}. <br />
  *
  * @author xi
  * @since Apr 27, 2016
  */
 public abstract class UpdateNode extends Node implements HasOperator {
+
+    //
+    // Graph structure.
+    //
 
     /**
      * Set all input nodes to this node. <br/>
@@ -36,7 +41,7 @@ public abstract class UpdateNode extends Node implements HasOperator {
     }
 
     //
-    // HasOperator interface.
+    // Operation.
     //
 
     protected Operator operator;
@@ -46,8 +51,18 @@ public abstract class UpdateNode extends Node implements HasOperator {
         return this.operator;
     }
 
+    @Override
+    public void setOperator(Class<? extends Operator> operatorType) {
+        this.operator = Operators.get(operatorType);
+    }
+
+    @Override
+    public void setOperator(Operator operator) {
+        this.operator = operator;
+    }
+
     //
-    // Executable interface.
+    // Execution.
     //
 
     @Override
@@ -63,7 +78,7 @@ public abstract class UpdateNode extends Node implements HasOperator {
     }
 
     //
-    //
+    // Build.
     //
 
     @Override
@@ -89,6 +104,10 @@ public abstract class UpdateNode extends Node implements HasOperator {
         this.inputs[0].build();
         this.matrix = this.inputs[0].getMatrix();
     }
+
+    //
+    // Simplify.
+    //
 
     @Override
     public Node simplify() {

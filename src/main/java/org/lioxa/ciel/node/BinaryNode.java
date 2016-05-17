@@ -14,6 +14,10 @@ import org.lioxa.ciel.operator.Operator;
  */
 public abstract class BinaryNode extends InternalNode {
 
+    //
+    // Graph structure.
+    //
+
     @Override
     protected void initShape() {
         this.initShape(this.inputs[0], this.inputs[1]);
@@ -21,8 +25,12 @@ public abstract class BinaryNode extends InternalNode {
 
     protected abstract void initShape(Node input0, Node input1);
 
+    //
+    // Build.
+    //
+
     @Override
-    protected void setOperator(Operator operator) {
+    protected void assignOperator(Operator operator) {
         if (!(operator instanceof BinaryOperator)) {
             String optClassName = operator.getClass().getName();
             String msg = String.format("The argument \"operator\": %s is not an binary operator.", optClassName);
@@ -30,6 +38,10 @@ public abstract class BinaryNode extends InternalNode {
         }
         this.operator = operator;
     }
+
+    //
+    // Simplify.
+    //
 
     @Override
     public Node simplify() {
@@ -39,7 +51,7 @@ public abstract class BinaryNode extends InternalNode {
     protected abstract Node simplify(Node input0, Node input1);
 
     //
-    // Executable interface.
+    // Execution.
     //
 
     @Override

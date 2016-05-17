@@ -6,11 +6,16 @@ import org.lioxa.ciel.operator.Operator;
 import org.lioxa.ciel.operator.Operators;
 
 /**
+ * {@link InternalNode}. <br />
  *
  * @author xi
  * @since Apr 7, 2016
  */
 public abstract class InternalNode extends Node implements HasOperator {
+
+    //
+    // Graph structure.
+    //
 
     /**
      * Set all input nodes to this node. <br/>
@@ -37,6 +42,10 @@ public abstract class InternalNode extends Node implements HasOperator {
      */
     protected abstract void initShape();
 
+    //
+    // Operation.
+    //
+
     protected Operator operator;
 
     @Override
@@ -45,24 +54,43 @@ public abstract class InternalNode extends Node implements HasOperator {
     }
 
     @Override
-    public void build() {
-        //
-        // Get target, input matrix classes, and then match operator.
-        Class<? extends Operator> operatorClass = this.context.matchOperator(this);
-        if (operatorClass == null) {
-            String msg = String.format("Failed to match operator for node %s.", this.getClass());
-            throw new RuntimeException(msg);
-        }
-        //
-        // Set operator.
-        Operator operator = Operators.get(operatorClass);
-        this.setOperator(operator);
-        //
-        // Set matrix.
-        this.matrix = MatrixUtils.createByOperator(operatorClass, this.rowSize, this.colSize);
+    public void setOperator(Class<? extends Operator> operatorType) {
+        this.operator = Operators.get(operatorType);
     }
 
-    protected abstract void setOperator(Operator operator);
+    @Override
+    public void setOperator(Operator operator) {
+        this.operator = operator;
+    }
+
+    //
+    // Build.
+    //
+
+    @Override
+    public void build() {
+        if (this.isBuild()) {
+            return;
+        }
+        if (this.operator == null) {
+            //
+            // Get operator class.
+            Class<? extends Operator> operatorClass = this.context.matchOperator(this);
+            if (operatorClass == null) {
+                String msg = String.format("Failed to match operator for node %s.", this.getClass());
+                throw new RuntimeException(msg);
+            }
+            //
+            // Set operator.
+            Operator operator = Operators.get(operatorClass);
+            this.assignOperator(operator);
+        }
+        //
+        // Set matrix.
+        this.matrix = MatrixUtils.createByOperator(this.operator.getClass(), this.rowSize, this.colSize);
+    }
+
+    protected abstract void assignOperator(Operator operator);
 
     //
     // Differentiation.

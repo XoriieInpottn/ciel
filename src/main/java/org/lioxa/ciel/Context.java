@@ -121,7 +121,7 @@ public class Context implements Differentiable {
     }
 
     //
-    // Graph management.
+    // Terms.
     //
 
     public VarTerm newVar(int rowSize, int colSize) {
@@ -286,6 +286,10 @@ public class Context implements Differentiable {
     public Term sum(Term input0) {
         return this.internalNode(SumNode.class, (Node) input0);
     }
+
+    //
+    // Graph structure.
+    //
 
     WeakHashMap<Class<? extends Node>, WeakHashMap<Node, Object>> graph = new WeakHashMap<>();
 
@@ -470,7 +474,7 @@ public class Context implements Differentiable {
     }
 
     //
-    // Differentiable interface.
+    // Differentiation.
     //
 
     Gradient gradient = new Gradient(this);

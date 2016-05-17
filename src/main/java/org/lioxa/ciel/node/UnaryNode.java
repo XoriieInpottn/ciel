@@ -14,6 +14,10 @@ import org.lioxa.ciel.operator.UnaryOperator;
  */
 public abstract class UnaryNode extends InternalNode {
 
+    //
+    // Graph structure.
+    //
+
     @Override
     protected void initShape() {
         this.initShape(this.inputs[0]);
@@ -21,8 +25,12 @@ public abstract class UnaryNode extends InternalNode {
 
     protected abstract void initShape(Node input0);
 
+    //
+    // Build.
+    //
+
     @Override
-    protected void setOperator(Operator operator) {
+    protected void assignOperator(Operator operator) {
         if (!(operator instanceof UnaryOperator)) {
             String optClassName = operator.getClass().getName();
             String msg = String.format("The argument \"operator\": %s is not an unary operator.", optClassName);
@@ -30,6 +38,10 @@ public abstract class UnaryNode extends InternalNode {
         }
         this.operator = operator;
     }
+
+    //
+    // Simplify.
+    //
 
     @Override
     public Node simplify() {
@@ -39,7 +51,7 @@ public abstract class UnaryNode extends InternalNode {
     protected abstract Node simplify(Node input0);
 
     //
-    // Executable interface.
+    // Execution.
     //
 
     @Override

@@ -5,6 +5,7 @@ import org.lioxa.ciel.matrix.MatrixUtils;
 import org.lioxa.ciel.matrix.RealMatrix;
 
 /**
+ * {@link ConstNode}. <br />
  *
  * @author xi
  * @since Apr 4, 2016
@@ -12,6 +13,10 @@ import org.lioxa.ciel.matrix.RealMatrix;
 public class ConstNode extends LeafNode implements ConstTerm {
 
     RealMatrix value;
+
+    //
+    // Value.
+    //
 
     @Override
     public RealMatrix getValue() {
@@ -23,6 +28,10 @@ public class ConstNode extends LeafNode implements ConstTerm {
         this.rowSize = value.getRowSize();
         this.colSize = value.getColumnSize();
     }
+
+    //
+    // Build.
+    //
 
     @Override
     public void build() {

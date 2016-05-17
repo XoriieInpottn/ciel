@@ -4,6 +4,7 @@ import org.lioxa.ciel.matrix.MatrixUtils;
 import org.lioxa.ciel.matrix.RealMatrix;
 
 /**
+ * {@link LeafNode}. <br /.
  *
  * @author xi
  * @since Apr 4, 2016
@@ -14,17 +15,23 @@ public abstract class LeafNode extends Node {
         this.inputs = new Node[0];
     }
 
+    //
+    // Execution.
+    //
+
     @Override
     public RealMatrix execute() {
         this.isExpired = false;
         return this.matrix;
     }
 
+    //
+    // Build.
+    //
+
     @Override
     public void build() {
-        if (this.matrix != null) {
-            //
-            // In this situation, the matrix has been set manually.
+        if (this.isBuild()) {
             return;
         }
         //

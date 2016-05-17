@@ -3,6 +3,7 @@ package org.lioxa.ciel.node;
 import org.lioxa.ciel.matrix.impl.SingleValueMatrix;
 
 /**
+ * {@link ZeroNode}. <br />
  *
  * @author xi
  * @since Apr 7, 2016

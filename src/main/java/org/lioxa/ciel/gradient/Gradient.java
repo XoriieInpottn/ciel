@@ -29,7 +29,7 @@ public class Gradient implements Differentiable {
         //
         // Check context
         if (cost.getContext() != this.context || respectTo.getContext() != this.context) {
-            throw new RuntimeException("Any of the nodes may not belong to this.context context.");
+            throw new RuntimeException("Any of the nodes may not belong to this context.");
         }
         //
         // Get tree nodes.
@@ -52,11 +52,11 @@ public class Gradient implements Differentiable {
         //
         // Check context
         if (cost.getContext() != this.context) {
-            throw new RuntimeException("Any of the nodes may not belong to this.context context.");
+            throw new RuntimeException("Any of the nodes may not belong to this context.");
         }
         for (Node respectTo1 : respectTo) {
             if (respectTo1.getContext() != this.context) {
-                throw new RuntimeException("Any of the nodes may not belong to this.context context.");
+                throw new RuntimeException("Any of the nodes may not belong to this context.");
             }
         }
         //

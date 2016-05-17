@@ -20,15 +20,22 @@ public interface HasOperator {
 
     /**
      * Set an operator to this node. <br/>
-     * At the same time, a result matrix is created by the operator. <br/>
-     * Note that the result matrix must be created by an specific operator since
-     * the matrix implementation can be <b>deeply depends</b> on the organize of
-     * the operator. Moreover, the operator can be set only once at the initial
-     * stage, or a runtime exception will be thrown.
+     * By default, the operator of a node is null and it will be set
+     * automatically during the build stage. But in some special cases, like
+     * when user defines a custom operator, it need to be set manually.
+     * 
+     * @param operatorType
+     *            The operator type.
+     */
+    void setOperator(Class<? extends Operator> operatorType);
+
+    /**
+     * Set an operator to this node. <br/>
+     *
      *
      * @param operator
      *            The operator.
      */
-    // void setOperator(Operator operator);
+    void setOperator(Operator operator);
 
 }

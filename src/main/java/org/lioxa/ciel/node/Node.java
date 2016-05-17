@@ -20,7 +20,7 @@ import org.lioxa.ciel.matrix.RealMatrix;
 public abstract class Node implements Term, HasMatrix, Executable {
 
     //
-    // HasShape interface.
+    // Shape.
     //
 
     protected int rowSize;
@@ -62,7 +62,7 @@ public abstract class Node implements Term, HasMatrix, Executable {
     }
 
     //
-    // Term interface.
+    // Graph structure.
     //
 
     protected Context context;
@@ -97,7 +97,7 @@ public abstract class Node implements Term, HasMatrix, Executable {
     }
 
     //
-    // HasMatrix interface.
+    // Matrix.
     //
 
     /**
@@ -119,7 +119,7 @@ public abstract class Node implements Term, HasMatrix, Executable {
     }
 
     //
-    // Executable interface.
+    // Execution.
     //
 
     protected boolean isExpired = true;
@@ -144,6 +144,10 @@ public abstract class Node implements Term, HasMatrix, Executable {
     // Build.
     //
 
+    public boolean isBuild() {
+        return this.matrix != null;
+    }
+
     public abstract void build();
 
     //
@@ -155,7 +159,7 @@ public abstract class Node implements Term, HasMatrix, Executable {
     }
 
     //
-    //
+    // Misc.
     //
 
     @Override

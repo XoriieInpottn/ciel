@@ -4,6 +4,7 @@ import org.lioxa.ciel.VarTerm;
 import org.lioxa.ciel.matrix.RealMatrix;
 
 /**
+ * {@link VarNode}. <br />
  *
  * @author xi
  * @since Apr 4, 2016
@@ -14,6 +15,10 @@ public class VarNode extends LeafNode implements VarTerm {
         this.rowSize = rowSize;
         this.colSize = colSize;
     }
+
+    //
+    // Value.
+    //
 
     @Override
     public RealMatrix getValue() {
