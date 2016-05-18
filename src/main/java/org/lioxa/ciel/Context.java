@@ -59,18 +59,44 @@ public class Context implements Differentiable {
     // Bindings.
     //
 
-    Class<? extends RealMatrix> defaultMatrixClass = RealMatrixImpl.class;
+    /**
+     * Default Matrix type.
+     */
+    Class<? extends RealMatrix> defaultMatrixType = RealMatrixImpl.class;
 
-    public Class<? extends RealMatrix> getDefaultMatrixClass() {
-        return this.defaultMatrixClass == null ? RealMatrixImpl.class : this.defaultMatrixClass;
+    /**
+     * Get default matrix type. <br />
+     * The matrix refers to that in the {@link LeafNode} which can also be set
+     * manually.
+     *
+     * @return The default matrix type.
+     */
+    public Class<? extends RealMatrix> getDefaultMatrixType() {
+        return this.defaultMatrixType == null ? RealMatrixImpl.class : this.defaultMatrixType;
     }
 
-    public void setDefaultMatrixClass(Class<? extends RealMatrix> defaultMatrixClass) {
-        this.defaultMatrixClass = defaultMatrixClass;
+    /**
+     * Set default matrix type.
+     *
+     * @param matrixType
+     *            The matrix type to be set.
+     */
+    public void setDefaultMatrixType(Class<? extends RealMatrix> matrixType) {
+        this.defaultMatrixType = matrixType;
     }
 
+    /**
+     * Binding manager.
+     */
     BindingManager bindingManager = new BindingManager();
 
+    /**
+     * Get binding manager. <br />
+     * The binding manager is used to bind operators to nodes and match
+     * appropriate operator for a given node.
+     *
+     * @return The binding manager.
+     */
     public BindingManager getBindingManager() {
         return this.bindingManager;
     }
@@ -107,6 +133,13 @@ public class Context implements Differentiable {
         }
     }
 
+    /**
+     * Match a appropriate operator for a given node.
+     *
+     * @param node
+     *            The given node.
+     * @return The matches operator.
+     */
     public Class<? extends Operator> matchOperator(Node node) {
         Class<? extends Node> target = node.getClass();
         int inputSize = node.getInputSize();
@@ -124,22 +157,67 @@ public class Context implements Differentiable {
     // Terms.
     //
 
+    /**
+     * Create a new variable term.
+     *
+     * @param rowSize
+     *            The row size.
+     * @param colSize
+     *            The column size.
+     * @return The created term.
+     */
     public VarTerm newVar(int rowSize, int colSize) {
         return this.varNode(rowSize, colSize);
     }
 
+    /**
+     * Create a new constant term.
+     *
+     * @param value
+     *            The constant value.
+     * @return The created term.
+     */
     public ConstTerm newConst(RealMatrix value) {
         return this.constNode(value);
     }
 
+    /**
+     * Create a new constant term with fixed value.
+     *
+     * @param rowSize
+     *            The row size.
+     * @param colSize
+     *            The column size.
+     * @param value
+     *            The value.
+     * @return The created term.
+     */
     public ConstTerm newConst(int rowSize, int colSize, double value) {
         return this.constNode(rowSize, colSize, value);
     }
 
+    /**
+     * Create a new constant term with all "1" value.
+     *
+     * @param rowSize
+     *            The row size.
+     * @param colSize
+     *            The column size.
+     * @return The created term.
+     */
     public ConstTerm newOne(int rowSize, int colSize) {
         return this.oneNode(rowSize, colSize);
     }
 
+    /**
+     * Create a new constant term with all "0" value.
+     *
+     * @param rowSize
+     *            The row size.
+     * @param colSize
+     *            The column size.
+     * @return The created term.
+     */
     public ConstTerm newZero(int rowSize, int colSize) {
         return this.zeroNode(rowSize, colSize);
     }
@@ -291,8 +369,15 @@ public class Context implements Differentiable {
     // Graph structure.
     //
 
-    WeakHashMap<Class<? extends Node>, WeakHashMap<Node, Object>> graph = new WeakHashMap<>();
-
+    /**
+     * Create a new variable node.
+     *
+     * @param rowSize
+     *            The row size.
+     * @param colSize
+     *            The column size.
+     * @return The created node.
+     */
     public VarNode varNode(int rowSize, int colSize) {
         VarNode node = new VarNode(rowSize, colSize);
         node.setContext(this);
@@ -300,6 +385,13 @@ public class Context implements Differentiable {
         return node;
     }
 
+    /**
+     * Create a new constant node.
+     *
+     * @param value
+     *            The constant value.
+     * @return The created node.
+     */
     public ConstNode constNode(RealMatrix value) {
         ConstNode node = new ConstNode(value);
         node.setContext(this);
@@ -307,6 +399,17 @@ public class Context implements Differentiable {
         return node;
     }
 
+    /**
+     * Create a new constant node with fixed value.
+     *
+     * @param rowSize
+     *            The row size.
+     * @param colSize
+     *            The column size.
+     * @param value
+     *            The value.
+     * @return The created node.
+     */
     public ConstNode constNode(int rowSize, int colSize, double value) {
         ConstNode node = new ConstNode(new SingleValueMatrix(rowSize, colSize, value));
         node.setContext(this);
@@ -314,6 +417,15 @@ public class Context implements Differentiable {
         return node;
     }
 
+    /**
+     * Create a new constant node with all "1" value.
+     *
+     * @param rowSize
+     *            The row size.
+     * @param colSize
+     *            The column value.
+     * @return The created node.
+     */
     public OneNode oneNode(int rowSize, int colSize) {
         OneNode node = new OneNode(rowSize, colSize);
         node.setContext(this);
@@ -321,6 +433,15 @@ public class Context implements Differentiable {
         return node;
     }
 
+    /**
+     * Create a new constant node with all "0" value.
+     *
+     * @param rowSize
+     *            The row size.
+     * @param colSize
+     *            The column size.
+     * @return The created node.
+     */
     public ZeroNode zeroNode(int rowSize, int colSize) {
         ZeroNode node = new ZeroNode(rowSize, colSize);
         node.setContext(this);
@@ -329,32 +450,34 @@ public class Context implements Differentiable {
     }
 
     /**
-     * Create (or get the existing) a node with the specific type and inputs.
+     * Create a (or get the existing) "internal node" with the specific type and
+     * inputs.
      *
-     * @param clazz
+     * @param nodeType
      *            The node class which indicates the node type.
      * @param inputs
      *            The input nodes.
      * @return A node. It may be a new created node or an existing node in the
      *         context.
      */
-    public Node internalNode(Class<? extends InternalNode> clazz, Node... inputs) {
-        InternalNode node = (InternalNode) this.queryGraph(clazz, inputs);
+    public Node internalNode(Class<? extends InternalNode> nodeType, Node... inputs) {
+        InternalNode node = (InternalNode) this.queryGraph(nodeType, inputs);
         if (node != null) {
             return node;
         }
         //
         // If this kind of node has never been created, created it now.
         try {
-            node = clazz.newInstance();
+            node = nodeType.newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
-            String msg = String.format("Failed to create node %s.", clazz.getName());
+            String msg = String.format("Failed to create node %s.", nodeType.getName());
             throw new RuntimeException(msg, e);
         }
         //
         // Then, set the basic info to it.
         node.setContext(this);
         node.setInputs(inputs);
+        node.initShape();
         //
         // And insert it into the global graph.
         this.insertGraph(node);
@@ -363,17 +486,30 @@ public class Context implements Differentiable {
         return this.simplify(node);
     }
 
-    public Node updateNode(Class<? extends UpdateNode> clazz, Node target, Node input) {
-        UpdateNode node = (UpdateNode) this.queryGraph(clazz, target, input);
+    /**
+     * Create a (or get the existing) "update node" with the specific type and
+     * inputs.
+     *
+     * @param nodeType
+     *            The node class which indicates the node type.
+     * @param target
+     *            The target wants to be updated.
+     * @param input
+     *            The input node.
+     * @return A node. It may be a new created node or an existing node in the
+     *         context.
+     */
+    public Node updateNode(Class<? extends UpdateNode> nodeType, Node target, Node input) {
+        UpdateNode node = (UpdateNode) this.queryGraph(nodeType, target, input);
         if (node != null) {
             return node;
         }
         //
         // If this kind of node has never been created, created it now.
         try {
-            node = clazz.newInstance();
+            node = nodeType.newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
-            String msg = String.format("Failed to create node %s.", clazz.getName());
+            String msg = String.format("Failed to create node %s.", nodeType.getName());
             throw new RuntimeException(msg, e);
         }
         //
@@ -388,6 +524,83 @@ public class Context implements Differentiable {
         return this.simplify(node);
     }
 
+    /**
+     * The node graph.
+     */
+    WeakHashMap<Class<?>, WeakHashMap<Node, Object>> graph = new WeakHashMap<>();
+
+    /**
+     * Query a specific pattern of node in the graph.
+     *
+     * @param nodeType
+     *            The node class.
+     * @param inputs
+     *            The input nodes.
+     * @return The node that has the specific pattern. If there is no such node,
+     *         null will be return.
+     */
+    Node queryGraph(Class<? extends Node> nodeType, Node... inputs) {
+        //
+        // Compare node type.
+        WeakHashMap<Node, Object> nodes = this.graph.get(nodeType);
+        if (nodes == null) {
+            return null;
+        }
+        for (Node node : nodes.keySet()) {
+            //
+            // Compare inputs pattern.
+            if (hasInputs(node, inputs)) {
+                return node;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Check if the given node has the specific inputs.
+     *
+     * @param node
+     *            The given node.
+     * @param inputs
+     *            The inputs.
+     * @return True if the node's inputs are exactly the same with the given
+     *         ones or false if not.
+     */
+    static boolean hasInputs(Node node, Node... inputs) {
+        int inputSize = node.getInputSize();
+        if (inputs.length != inputSize) {
+            return false;
+        }
+        for (int i = 0; i < inputSize; i++) {
+            if (!node.getInput(i).equals(inputs[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Insert the given node to the graph. <br>
+     * Never check if there is already a node which has the same pattern in the
+     * graph. It is important to use queryGraph() first to ensure there is no
+     * duplicated node.
+     *
+     * @param node
+     *            The node to be inserted into the graph.
+     */
+    void insertGraph(Node node) {
+        Class<?> nodeType = node.getClass();
+        WeakHashMap<Node, Object> nodes = this.graph.get(nodeType);
+        if (nodes == null) {
+            nodes = new WeakHashMap<>();
+            this.graph.put(nodeType, nodes);
+        }
+        nodes.put(node, null);
+    }
+
+    /**
+     * The simplifiers.
+     */
     List<Simplifier> simplifiers = new LinkedList<>();
 
     Node simplify(Node node) {
@@ -400,55 +613,6 @@ public class Context implements Differentiable {
             node = sim.simplify((InternalNode) node);
         }
         return node.simplify();
-    }
-
-    /**
-     * Query a specific pattern of node in the graph.
-     *
-     * @param clazz
-     *            The node class.
-     * @param inputs
-     *            The input nodes.
-     * @return The node that has the specific pattern. If there is no such node,
-     *         null will be return.
-     */
-    Node queryGraph(Class<?> clazz, Node... inputs) {
-        WeakHashMap<Node, Object> nodes = this.graph.get(clazz);
-        if (nodes == null) {
-            return null;
-        }
-        for (Node term : nodes.keySet()) {
-            int inputSize = term.getInputSize();
-            if (inputs.length != inputSize) {
-                continue;
-            }
-            int i;
-            for (i = 0; i < inputSize; i++) {
-                if (!term.getInput(i).equals(inputs[i])) {
-                    break;
-                }
-            }
-            if (i == inputSize) {
-                return term;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Insert the given node to the graph.
-     *
-     * @param node
-     *            The node to be inserted into the graph.
-     */
-    void insertGraph(Node node) {
-        Class<? extends Node> clazz = node.getClass();
-        WeakHashMap<Node, Object> nodes = this.graph.get(clazz);
-        if (nodes == null) {
-            nodes = new WeakHashMap<>();
-            this.graph.put(clazz, nodes);
-        }
-        nodes.put(node, null);
     }
 
     //
@@ -477,6 +641,9 @@ public class Context implements Differentiable {
     // Differentiation.
     //
 
+    /**
+     * Gradient.
+     */
     Gradient gradient = new Gradient(this);
 
     @Override

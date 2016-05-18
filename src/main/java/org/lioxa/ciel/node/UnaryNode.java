@@ -15,15 +15,26 @@ import org.lioxa.ciel.operator.UnaryOperator;
 public abstract class UnaryNode extends InternalNode {
 
     //
-    // Graph structure.
+    // Shape.
     //
 
     @Override
-    protected void initShape() {
+    public void initShape() {
         this.initShape(this.inputs[0]);
     }
 
     protected abstract void initShape(Node input0);
+
+    //
+    // Simplify.
+    //
+
+    @Override
+    public Node simplify() {
+        return this.simplify(this.inputs[0]);
+    }
+
+    protected abstract Node simplify(Node input0);
 
     //
     // Build.
@@ -40,24 +51,15 @@ public abstract class UnaryNode extends InternalNode {
     }
 
     //
-    // Simplify.
-    //
-
-    @Override
-    public Node simplify() {
-        return this.simplify(this.inputs[0]);
-    }
-
-    protected abstract Node simplify(Node input0);
-
-    //
     // Execution.
     //
 
     @Override
     public RealMatrix execute() {
         if (this.isExpired) {
-            System.out.println("Unary node executed.");
+            //
+            // DEBUG
+            // System.out.println("Unary node executed.");
             //
             // Get the input matrices.
             Node input0 = this.inputs[0];

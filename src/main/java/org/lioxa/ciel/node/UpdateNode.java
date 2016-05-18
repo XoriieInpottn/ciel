@@ -62,19 +62,18 @@ public abstract class UpdateNode extends Node implements HasOperator {
     }
 
     //
-    // Execution.
+    // Simplify.
     //
 
     @Override
-    public RealMatrix execute() {
+    public Node simplify() {
+        return this.simplify(this.inputs[0]);
+    }
+
+    protected Node simplify(Node input0) {
         //
-        // Get the input matrices.
-        Node input0 = this.inputs[1];
-        RealMatrix matrix0 = input0.execute();
-        //
-        // Execute the operator.
-        ((UnaryOperator) this.operator).execute(this.matrix, matrix0);
-        return this.matrix;
+        // Simplifications are not encouraged in this kind of node.
+        return this;
     }
 
     //
@@ -106,18 +105,19 @@ public abstract class UpdateNode extends Node implements HasOperator {
     }
 
     //
-    // Simplify.
+    // Execution.
     //
 
     @Override
-    public Node simplify() {
-        return this.simplify(this.inputs[0]);
-    }
-
-    protected Node simplify(Node input0) {
+    public RealMatrix execute() {
         //
-        // Simplifications are not encouraged in this kind of node.
-        return this;
+        // Get the input matrices.
+        Node input0 = this.inputs[1];
+        RealMatrix matrix0 = input0.execute();
+        //
+        // Execute the operator.
+        ((UnaryOperator) this.operator).execute(this.matrix, matrix0);
+        return this.matrix;
     }
 
 }

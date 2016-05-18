@@ -16,16 +16,6 @@ public abstract class LeafNode extends Node {
     }
 
     //
-    // Execution.
-    //
-
-    @Override
-    public RealMatrix execute() {
-        this.isExpired = false;
-        return this.matrix;
-    }
-
-    //
     // Build.
     //
 
@@ -39,8 +29,18 @@ public abstract class LeafNode extends Node {
         //
         // This requires all implementations of RealMatrix have a
         // constructor like "constructor(int rowSize, int colSize)".
-        Class<? extends RealMatrix> matrixClass = this.context.getDefaultMatrixClass();
+        Class<? extends RealMatrix> matrixClass = this.context.getDefaultMatrixType();
         this.matrix = MatrixUtils.createByClass(matrixClass, this.rowSize, this.colSize);
+    }
+
+    //
+    // Execution.
+    //
+
+    @Override
+    public RealMatrix execute() {
+        this.isExpired = false;
+        return this.matrix;
     }
 
 }

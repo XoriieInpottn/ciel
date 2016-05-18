@@ -14,6 +14,15 @@ import org.lioxa.ciel.operator.Operators;
 public abstract class InternalNode extends Node implements HasOperator {
 
     //
+    // Shape.
+    //
+
+    /**
+     * Initialize shape for the node.
+     */
+    public abstract void initShape();
+
+    //
     // Graph structure.
     //
 
@@ -34,13 +43,7 @@ public abstract class InternalNode extends Node implements HasOperator {
         for (Node input : this.inputs) {
             input.outputs.put(this, null);
         }
-        this.initShape();
     }
-
-    /**
-     * Initialize shape for the node.
-     */
-    protected abstract void initShape();
 
     //
     // Operation.
@@ -55,11 +58,14 @@ public abstract class InternalNode extends Node implements HasOperator {
 
     @Override
     public void setOperator(Class<? extends Operator> operatorType) {
-        this.operator = Operators.get(operatorType);
+        this.setOperator(Operators.get(operatorType));
     }
 
     @Override
     public void setOperator(Operator operator) {
+        if (this.isBuild()) {
+            throw new IllegalStateException("Cannot set operator to a node which has already been build.");
+        }
         this.operator = operator;
     }
 

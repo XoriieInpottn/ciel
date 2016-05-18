@@ -20,6 +20,56 @@ import org.lioxa.ciel.matrix.RealMatrix;
 public abstract class Node implements Term, HasMatrix, Executable {
 
     //
+    // Context.
+    //
+
+    protected Context context;
+
+    @Override
+    public Context getContext() {
+        return this.context;
+    }
+
+    /**
+     * Set context.
+     *
+     * @param context
+     *            The context to be set.
+     */
+    public void setContext(Context context) {
+        if (this.context != null) {
+            throw new IllegalStateException("Context has been set.");
+        }
+        this.context = context;
+    }
+
+    //
+    // Graph structure.
+    //
+
+    protected Node[] inputs;
+    protected Map<Node, Object> outputs = new WeakHashMap<>();
+
+    @Override
+    public int getInputSize() {
+        return this.inputs.length;
+    }
+
+    @Override
+    public Term getInput(int index) {
+        return this.inputs[index];
+    }
+
+    /**
+     * Get output nodes.
+     *
+     * @return The set of output nodes.
+     */
+    public Set<Node> getOutputs() {
+        return this.outputs.keySet();
+    }
+
+    //
     // Shape.
     //
 
@@ -62,38 +112,18 @@ public abstract class Node implements Term, HasMatrix, Executable {
     }
 
     //
-    // Graph structure.
+    // Simplify.
     //
 
-    protected Context context;
-
-    @Override
-    public Context getContext() {
-        return this.context;
-    }
-
-    public void setContext(Context context) {
-        if (this.context != null) {
-            throw new IllegalStateException("Context has been set.");
-        }
-        this.context = context;
-    }
-
-    protected Node[] inputs;
-    protected Map<Node, Object> outputs = new WeakHashMap<>();
-
-    @Override
-    public int getInputSize() {
-        return this.inputs.length;
-    }
-
-    @Override
-    public Term getInput(int index) {
-        return this.inputs[index];
-    }
-
-    public Set<Node> getOutputs() {
-        return this.outputs.keySet();
+    /**
+     * Simplify the structure of this node based on the corresponding
+     * computational feature. <br />
+     * The default result is "this", which means does no simplify.
+     *
+     * @return The simplified node.
+     */
+    public Node simplify() {
+        return this;
     }
 
     //
@@ -101,7 +131,7 @@ public abstract class Node implements Term, HasMatrix, Executable {
     //
 
     /**
-     * The result matrix is created by the operator when setting operator.
+     * The result matrix is created default by the operator when build the node.
      */
     protected RealMatrix matrix;
 
@@ -117,6 +147,24 @@ public abstract class Node implements Term, HasMatrix, Executable {
         }
         this.matrix = matrix;
     }
+
+    //
+    // Build.
+    //
+
+    /**
+     * If this node has been build.
+     *
+     * @return True if this node has been build or false if not.
+     */
+    public boolean isBuild() {
+        return this.matrix != null;
+    }
+
+    /**
+     * Build the node tree rooted with this node.
+     */
+    public abstract void build();
 
     //
     // Execution.
@@ -138,24 +186,6 @@ public abstract class Node implements Term, HasMatrix, Executable {
         for (Node output : this.outputs.keySet()) {
             output.setExpired();
         }
-    }
-
-    //
-    // Build.
-    //
-
-    public boolean isBuild() {
-        return this.matrix != null;
-    }
-
-    public abstract void build();
-
-    //
-    // Simplify.
-    //
-
-    public Node simplify() {
-        return this;
     }
 
     //
