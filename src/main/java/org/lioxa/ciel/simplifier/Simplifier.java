@@ -1,6 +1,5 @@
 package org.lioxa.ciel.simplifier;
 
-import org.lioxa.ciel.node.InternalNode;
 import org.lioxa.ciel.node.Node;
 
 /**
@@ -10,6 +9,6 @@ import org.lioxa.ciel.node.Node;
  */
 public interface Simplifier {
 
-    Node simplify(InternalNode node);
+    Node simplify(Node node);
 
 }

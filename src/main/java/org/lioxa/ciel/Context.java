@@ -603,14 +603,19 @@ public class Context implements Differentiable {
      */
     List<Simplifier> simplifiers = new LinkedList<>();
 
+    /**
+     * Apply simplify chain and node simplifier.
+     *
+     * @param node
+     *            The node to be simplified.
+     * @return The simplified node.
+     */
     Node simplify(Node node) {
         for (Simplifier sim : this.simplifiers) {
             if (node instanceof LeafNode) {
                 break;
             }
-            //
-            // TODO: Update nodes may have problems here.
-            node = sim.simplify((InternalNode) node);
+            node = sim.simplify(node);
         }
         return node.simplify();
     }

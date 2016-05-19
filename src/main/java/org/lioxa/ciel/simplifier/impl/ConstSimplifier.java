@@ -18,7 +18,12 @@ import org.lioxa.ciel.simplifier.Simplifier;
 public class ConstSimplifier implements Simplifier {
 
     @Override
-    public Node simplify(InternalNode node) {
+    public Node simplify(Node node) {
+        //
+        // Only make effect with internal node.
+        if (!(node instanceof InternalNode)) {
+            return node;
+        }
         //
         // check whether all inputs are Constant
         int inputSize = node.getInputSize();
@@ -38,14 +43,14 @@ public class ConstSimplifier implements Simplifier {
         //
         // Get operator.
         DefaultOperator ann = node.getClass().getAnnotation(DefaultOperator.class);
-        Class<? extends Operator> operatorClass;
-        if (ann == null || (operatorClass = ann.value()) == null) {
+        Class<? extends Operator> operatorType;
+        if (ann == null || (operatorType = ann.value()) == null) {
             return node;
         }
-        Operator operator = Operators.get(operatorClass);
+        Operator operator = Operators.get(operatorType);
         //
         // Perform operation.
-        RealMatrix resultMatrix = MatrixUtils.createByOperator(operatorClass, node.getRowSize(), node.getColumnSize());
+        RealMatrix resultMatrix = MatrixUtils.createByOperator(operatorType, node.getRowSize(), node.getColumnSize());
         operator.execute(resultMatrix, inputMatrices);
         //
         // Make result term.
