@@ -27,6 +27,7 @@ import org.lioxa.ciel.node.impl.DotNode;
 import org.lioxa.ciel.node.impl.MulMSNode;
 import org.lioxa.ciel.node.impl.MulNode;
 import org.lioxa.ciel.node.impl.MulSMNode;
+import org.lioxa.ciel.node.impl.SigmoidNode;
 import org.lioxa.ciel.node.impl.SubMSNode;
 import org.lioxa.ciel.node.impl.SubNode;
 import org.lioxa.ciel.node.impl.SubSMNode;
@@ -355,6 +356,18 @@ public class Context implements Differentiable {
     }
 
     /**
+     *
+     * Sigmoid.
+     *
+     * @param input0
+     *            The input0.
+     * @return The term that represent the result.
+     */
+    public Term sigmoid(Term input0) {
+        return this.internalNode(SigmoidNode.class, (Node) input0);
+    }
+
+    /**
      * Sum of the matrix.
      *
      * @param input0
@@ -636,7 +649,7 @@ public class Context implements Differentiable {
      *            The root {@link Term} of the expression.
      * @return The executable root of the expression.
      */
-    public Executable build(Term term) {
+    public ExeTerm build(Term term) {
         Node node = (Node) term;
         node.build();
         return node;

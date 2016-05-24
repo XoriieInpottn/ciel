@@ -3,7 +3,7 @@ package org.lioxa.ciel;
 import org.lioxa.ciel.matrix.RealMatrix;
 
 /**
- * The {@link Executable} is an interface that means a node is already build and
+ * The {@link ExeTerm} is an interface that means a node is already build and
  * can be then executed. <br/>
  * Every expression can be built by its context. Then, the expression structure
  * is optimized(Expressions which have the same structure are merged). At the
@@ -12,7 +12,7 @@ import org.lioxa.ciel.matrix.RealMatrix;
  * @author xi
  * @since Feb 27, 2016
  */
-public interface Executable {
+public interface ExeTerm extends Term {
 
     /**
      * Is the value of result matrix expired? <br/>

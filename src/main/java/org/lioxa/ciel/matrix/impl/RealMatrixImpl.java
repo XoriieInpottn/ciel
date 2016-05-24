@@ -13,7 +13,7 @@ import org.lioxa.ciel.matrix.RealMatrix;
  */
 public class RealMatrixImpl implements RealMatrix {
 
-    final double[][] values;
+    double[][] values;
 
     /**
      * Construct from shape. <br/>

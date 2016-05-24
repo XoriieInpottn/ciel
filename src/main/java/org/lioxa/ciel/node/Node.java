@@ -5,19 +5,19 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 import org.lioxa.ciel.Context;
-import org.lioxa.ciel.Executable;
+import org.lioxa.ciel.ExeTerm;
 import org.lioxa.ciel.HasShape;
 import org.lioxa.ciel.Term;
 import org.lioxa.ciel.matrix.HasMatrix;
 import org.lioxa.ciel.matrix.RealMatrix;
 
 /**
- * The {@link Node} class is the default implementation of {@link Executable}.
+ * The {@link Node} class is the default implementation of {@link ExeTerm}.
  *
  * @author xi
  * @since Feb 26, 2016
  */
-public abstract class Node implements Term, HasMatrix, Executable {
+public abstract class Node implements Term, HasMatrix, ExeTerm {
 
     //
     // Context.

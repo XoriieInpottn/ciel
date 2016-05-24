@@ -3,9 +3,10 @@ package org.lioxa.ciel.test;
 import java.util.Random;
 
 import org.lioxa.ciel.Context;
-import org.lioxa.ciel.Executable;
+import org.lioxa.ciel.ExeTerm;
 import org.lioxa.ciel.Term;
 import org.lioxa.ciel.VarTerm;
+import org.lioxa.ciel.gradient.GradientChecker;
 import org.lioxa.ciel.matrix.RealMatrix;
 import org.lioxa.ciel.matrix.impl.RealMatrixImpl;
 import org.lioxa.ciel.node.Node;
@@ -25,8 +26,9 @@ public class Test {
         Term r = context.dot(x, y);
         r = context.trans(r);
         r = context.trans(r);
+        r = context.sigmoid(r);
         r = context.sum(r);
-        Executable exe = context.build(r);
+        ExeTerm exe = context.build(r);
         //
         //
         Random rnd = new Random();
@@ -59,11 +61,18 @@ public class Test {
         System.out.println(mx);
         System.out.println(my);
         System.out.println(exe.execute());
+        //
+        //
         Node grad = context.diff((Node) r, (Node) x);
         System.out.println("x = " + x);
         System.out.println("y = " + y);
         NodeUtils.printNodeTree(grad, 0);
+        //
+        //
+        GradientChecker gc = new GradientChecker(x, exe, context.build(grad), 10e-10);
+        for (int i = 0; i < 100; i++) {
+            System.out.println(gc.check(20 - i * 2));
+        }
         System.out.println("complete");
     }
-
 }

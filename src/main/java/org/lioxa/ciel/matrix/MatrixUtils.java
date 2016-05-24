@@ -4,6 +4,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 import org.lioxa.ciel.binding.OperatorBinding;
+import org.lioxa.ciel.matrix.impl.RealMatrixImpl;
 import org.lioxa.ciel.operator.Operator;
 
 /**
@@ -38,6 +39,12 @@ public class MatrixUtils {
             String msg = String.format("Failed to create instance for %s.", clazz.getName());
             throw new RuntimeException(msg, e);
         }
+    }
+
+    public static RealMatrixImpl copy(RealMatrix src) {
+        RealMatrixImpl dst = new RealMatrixImpl(src.getRowSize(), src.getColumnSize());
+        copy(dst, src);
+        return dst;
     }
 
     public static void copy(RealMatrix dst, RealMatrix src) {
